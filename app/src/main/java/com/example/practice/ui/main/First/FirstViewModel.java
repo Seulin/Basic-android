@@ -22,21 +22,21 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 public class FirstViewModel extends ViewModel {
-    private MutableLiveData<ArrayList<Dictionary>> contactList;
+    //private MutableLiveData<ArrayList<Dictionary>> contactList;
     private ArrayList<Dictionary> items;
 
-    public MutableLiveData<ArrayList<Dictionary>> getLiveList() {
+/*    public MutableLiveData<ArrayList<Dictionary>> getLiveList() {
         if (contactList == null) {
             items = new ArrayList<>();
             contactList = new MutableLiveData<>();
         }
         return contactList;
-    }
+    }*/
 
     public ArrayList<Dictionary> getList() {
-        if (contactList == null) {
+        if (items == null) {
             items = new ArrayList<>();
-            contactList = new MutableLiveData<>();
+            //contactList = new MutableLiveData<>();
         }
         return items;
     }
@@ -96,7 +96,7 @@ public class FirstViewModel extends ViewModel {
         Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
         String[] projection = new String[]{
                 ContactsContract.CommonDataKinds.Phone.NUMBER,
-                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
         };
 
         String[] selectionArgs = null;

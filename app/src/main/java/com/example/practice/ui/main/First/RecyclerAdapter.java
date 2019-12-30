@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import com.example.practice.R;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
-    private final int cindex;
-    private final int cvindex;
     private ArrayList<Dictionary> mData;
     Context context;
 
@@ -48,7 +46,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                 @Override
                 public void onClick(View v) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle("연락처"+cindex).setMessage(cvindex+"("+group+") "+number);
+                    builder.setTitle("연락처").setMessage("("+group+") "+number);
                     AlertDialog alertDialog = builder.create();
                     alertDialog.show();
                 }
@@ -92,7 +90,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                         AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
                         View v = LayoutInflater.from(context)
-                                .inflate(R.layout.edittext, null, false);
+                                .inflate(R.layout.frist_edittext, null, false);
                         builder.setView(v);
                         final EditText editname = v.findViewById(R.id.editname); //view에는 callbutton 존재x
                         final EditText editgroup = v.findViewById(R.id.editgroup);
@@ -125,11 +123,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     }
 
     // 생성자에서 데이터 리스트 객체를 전달받음.
-    public RecyclerAdapter(ArrayList<Dictionary> list, Context context, int cvindex, int cindex) {
+    public RecyclerAdapter(ArrayList<Dictionary> list, Context context) {
         this.mData = list;
         this.context = context;
-        this.cvindex = cvindex;
-        this.cindex= cindex;
     }
 
 
