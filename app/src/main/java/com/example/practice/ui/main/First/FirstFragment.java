@@ -3,6 +3,7 @@ package com.example.practice.ui.main.First;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,9 +57,10 @@ public class FirstFragment extends Fragment {
     FloatingActionButton fab, add, sync;
     Animation fabopen, fabclose, fabrclock, fabranticlock;
     boolean isOpen = false;
+    int cvindex = 0;
+    int cindex = 0;
 
     private FirstViewModel mViewModel;
-    private ArrayList<Dictionary> Items;
 
     public static FirstFragment newInstance() {
         return new FirstFragment();
@@ -65,10 +68,26 @@ public class FirstFragment extends Fragment {
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        cindex+=10;
         super.onCreate(savedInstanceState);
-        Items = new ArrayList<>();
-        String json = getJsonString();
-        jsonParsing(json, Items);
+        mViewModel = ViewModelProviders.of(this).get(FirstViewModel.class);
+
+        final Observer<ArrayList<Dictionary>> listObserver = new Observer<ArrayList<Dictionary>>() {
+            @Override
+            public void onChanged(ArrayList<Dictionary> dictionaries) {
+                //not used in this code,
+            }
+        };
+
+        mViewModel.getLiveList().observe(this, listObserver);
+        mViewModel.jsonProcess(getResources().getAssets());
+    }
+
+    String getout (ArrayList<Dictionary> Items) {
+        String a = "";
+        for (Dictionary dict : Items)
+            a += dict.getName();
+        return a;
     }
 
     @Override
@@ -78,8 +97,10 @@ public class FirstFragment extends Fragment {
         rv = view.findViewById(R.id.recycler);
         rv.addItemDecoration(new DividerItemDecoration(view.getContext(), 1));
 
-        ra = new RecyclerAdapter(Items, getActivity());
+        ra = new RecyclerAdapter(mViewModel.getList(), getActivity(), cvindex, cindex);
+        //Log.d("items", getout(Items));
         rv.setAdapter(ra);
+
 
         fab = view.findViewById(R.id.fab);
         add = view.findViewById(R.id.add);
@@ -105,7 +126,8 @@ public class FirstFragment extends Fragment {
                         fab.startAnimation(fabranticlock);
                         add.setClickable(false);
                         sync.setClickable(false);
-                        isOpen = false;}
+                        isOpen = false;
+                    }
                     fab.hide();
                     fab.setClickable(false);
                 } else if (dy < 0 && fab.getVisibility() != View.VISIBLE) {
@@ -114,15 +136,15 @@ public class FirstFragment extends Fragment {
                 }
             }
         });
+
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(FirstViewModel.class);
-    }
 
+    };
     View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -142,7 +164,8 @@ public class FirstFragment extends Fragment {
                         add.setClickable(false);
                         sync.setClickable(false);
                         isOpen = false;
-                    } break;
+                    }
+                    break;
                 case R.id.add: {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     View v = LayoutInflater.from(getActivity()).inflate(R.layout.edittext, null, false);
@@ -161,7 +184,7 @@ public class FirstFragment extends Fragment {
                             String strNumber = editnumber.getText().toString();
 
                             Dictionary dict = new Dictionary(strName, strGroup, strNumber);
-                            Items.add(dict); // RecyclerView의 마지막 줄에 삽입
+                            mViewModel.add(dict); // RecyclerView의 마지막 줄에 삽입
                             ra.notifyDataSetChanged();
                             dialog.dismiss();
                         }
@@ -170,101 +193,15 @@ public class FirstFragment extends Fragment {
                     break;
                 }
                 case R.id.sync: {
-                   try{
-                        getContactList();
+                    try {
+                        mViewModel.getContactList(getActivity());
                         ra.notifyDataSetChanged();
-                    } catch(SecurityException e) {
+                    } catch (SecurityException e) {
                         Snackbar.make(rv, "Accessing to contact is not allowed. Change your setting.", Snackbar.LENGTH_SHORT).show();
                     }
-                break; }
+                    break;
+                }
             }
         }
     };
-
-    private void getContactList() {
-        Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
-        String[] projection = new String[]{
-                ContactsContract.CommonDataKinds.Phone.NUMBER,
-                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-        };
-
-        String[] selectionArgs = null;
-        String sortOrder = ContactsContract.Contacts.DISPLAY_NAME + " COLLATE LOCALIZED ASC";
-
-        Cursor cursor = getActivity().getContentResolver().query(uri, projection, null,
-                selectionArgs, sortOrder);
-
-        LinkedHashSet<Dictionary> hashlist = new LinkedHashSet<>();
-        ArrayList<Dictionary> contactsList;
-
-        if (cursor.moveToFirst()) {
-            do {
-
-                Dictionary myContact = new Dictionary();
-                myContact.setNumber(cursor.getString(0));
-                myContact.setName(cursor.getString(1));
-
-                hashlist.add(myContact);
-            } while (cursor.moveToNext());
-        }
-
-        contactsList = new ArrayList<Dictionary>(hashlist);
-        for (int i = 0; i < contactsList.size(); i++) {
-            contactsList.get(i).setGroup("none");
-        }
-        if (cursor != null) {
-            cursor.close();
-        }
-        ArrayList<Dictionary> copy = new ArrayList<>(Items);
-        for (Dictionary dict : contactsList) {
-            if (hasdict(dict, copy)) {
-                break;}
-            else { Items.add(dict); }
-        }
-    }
-
-    private boolean hasdict(Dictionary dict, ArrayList<Dictionary> items) {
-        for (Dictionary item : items) {
-            if (item.getNumber().equals(dict.getNumber())) { return true; }
-        } return false;
-    }
-
-
-    private String getJsonString() {
-        String json = "";
-
-        try {
-            InputStream is = getResources().getAssets().open("data.json");
-            int fileSize = is.available();
-
-            byte[] buffer = new byte[fileSize];
-            is.read(buffer);
-            is.close();
-
-            json = new String(buffer, "UTF-8");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        return json;
-    }
-
-    private void jsonParsing(String json, ArrayList<Dictionary> items) {
-        try {
-            JSONObject jsonObject = new JSONObject(json);
-
-            String ContactAddress = jsonObject.getString("ContactAddress");
-            JSONArray dictionaryArray = new JSONArray(ContactAddress);
-
-            for (int i = 0; i < dictionaryArray.length(); i++) {
-                JSONObject dictObject = dictionaryArray.getJSONObject(i);
-                Dictionary dict = new Dictionary();
-                dict.setName(dictObject.getString("name"));
-                dict.setGroup(dictObject.getString("group"));
-                dict.setNumber(dictObject.getString("number"));
-                items.add(dict);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
 }
