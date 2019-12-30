@@ -63,7 +63,7 @@ public class FirstFragment extends Fragment {
     private FirstViewModel mViewModel;
 
     public static FirstFragment newInstance() {
-        return new FirstFragment();
+        return new FirstFragment(); //
     }
 
     @Override
