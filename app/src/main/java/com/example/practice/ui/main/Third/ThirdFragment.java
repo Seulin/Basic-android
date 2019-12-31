@@ -185,7 +185,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 Log.d("onActivityResult", "pick from album");
                 resultUri = result.getData(); //work at album, but not at camera!
                 Log.d("albumResult", resultUri+"");
-                imagePath = getRealPathFromURI(getContext(), resultUri);//////////// same code below
+                imagePath = getRealPathFromURI(getContext(), resultUri);
                 InputStream in = getContext().getContentResolver().openInputStream(result.getData());
                 Bitmap bitmap = BitmapFactory.decodeStream(in);
                 in.close();
@@ -194,7 +194,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                     Bitmap resultbitmap = checkRotate(imagePath, bitmap);
                     resultView.setImageBitmap(resultbitmap);
                 }
-            } catch (Exception error) { error.printStackTrace(); }///////// please check before revise this!!
+            } catch (Exception error) { error.printStackTrace(); }
         }
         if (requestCode == PICK_FROM_CAMERA && resultCode == Activity.RESULT_OK) {
             try {
@@ -204,6 +204,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 //resultUri = result.getData(); It caused error. result.getData() == null
                 File file = new File(imagePath);
                 Log.d("cameraResultsecond", Uri.fromFile(file)+"");
+                //////////// same code below
                 Bitmap bitmap2 = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), Uri.fromFile(file));
                 if (bitmap2 != null) {
                     Bitmap resultbitmap2 = checkRotate(imagePath, bitmap2);
@@ -211,13 +212,8 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                     resultView.setImageBitmap(resultbitmap2);
                 }
             } catch (Exception error) { error.printStackTrace(); Log.d("errorcamera", resultUri+"");}
-/*            Uri mPicImageURI = null;
-            if (mImageCaptureUri != null)
-                mPicImageURI = mImageCaptureUri;
-            else
-                mPicImageURI = result.getData();
-            Log.d("onActivityResult", "pick from camera");
-            resultUri = mPicImageURI;*/
+            ///////// please check before revise this!!
+
         } else if (requestCode == Crop.REQUEST_CROP) { //CROP된 이미지
             Log.d("beforehandlecrop" , "requestcrop");
             handleCrop(resultCode, result);
@@ -280,37 +276,16 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         if (resultCode == Activity.RESULT_OK) {
             // Activity 의 RESULT_OK값을 사용
             resultUri = (Crop.getOutput(result));//imagepath써
-/*            final Bundle extras = result.getExtras();
-            if(extras != null)
-            {Log.d("handlecrop, extras", extras+"");
-                Bitmap photo = extras.getParcelable("data");
-                resultView.setImageBitmap(photo);
-            }*/
-            출처: https://gogorchg.tistory.com/entry/Android-Camera-호출-후-이미지-Crop하기-예제 [항상 초심으로]
-/*            Log.d("handlecrop, resulturi", resultUri+"");
-            String imagePath = resultUri.getPath();
-            Log.d("handlecrop, imagepath", imagePath+"");
-            Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-            Bitmap resultbitmap = checkRotate(imagePath, bitmap);
-            Log.d("handlecrop, bitmap", resultbitmap+"");
-            resultView.setImageBitmap(resultbitmap);*/
-            //image rotation error doesn't fixed.ㅠㅜㅠ
-/*            Log.d("handle,resuUri,getOut", resultUri+"");
-            //resultUri = result.getData(); it is null
-            try {  //we have to get uri again! because the images was cropped
-            imagePath = getRealPathFromURI(getContext(), resultUri);
-            Log.d("handlecrop, imagepath", imagePath+"");
-            InputStream in = getContext().getContentResolver().openInputStream(resultUri);
-            Bitmap bitmap = BitmapFactory.decodeStream(in);
-            in.close();
-            if (bitmap != null) {
-                resultbitmap = checkRotate(imagePath, bitmap);
-                Log.d("handlecrop, bitmap", resultbitmap+"");
-                resultView.setImageBitmap(resultbitmap);
-            } } catch (Exception error) { error.printStackTrace(); Log.d("errorhandle", resultUri+"");}*/
+            try {//////////// same code above
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Crop.getOutput(result));
+                if (bitmap != null) {
+                    Bitmap resultbitmap = checkRotate(imagePath, bitmap);
+                    Log.d("bitmap!!handle,Path", imagePath + "");
+                    resultView.setImageBitmap(resultbitmap);
+                }
+            } catch (Exception error) { error.printStackTrace(); Log.d("errorcamera", resultUri+"");}
+            ///////// please check before revise this!!
 
-            resultView.setImageURI(resultUri);
-            //sendMMS(Crop.getOutput(result));
             if (cameraImage) {
                 File f = new File(mImageCaptureUri.getPath());
                 Log.d("if cameraImage??", "OK");
