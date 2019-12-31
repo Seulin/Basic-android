@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -29,6 +30,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.soundcloud.android.crop.Crop;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -158,7 +160,16 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 // 크롭이 된 이후의 이미지를 넘겨 받습니다.
                 // 이미지뷰에 이미지를 보여준다거나 부가적인 작업 이후에
                 // 임시 파일을 삭제합니다.
-                final Bundle extras = data.getExtras();
+                try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), mImageCaptureUri);
+                Bitmap thumbImage = ThumbnailUtils.extractThumbnail(bitmap, 128, 128);
+                ByteArrayOutputStream bs = new ByteArrayOutputStream();
+                thumbImage.compress(Bitmap.CompressFormat.JPEG, 100, bs);
+                resultView.setImageBitmap(thumbImage);
+            } catch (Exception e) {
+                Log.e("ERROR", e.getMessage().toString());
+            }
+/*                final Bundle extras = data.getExtras();
                 String filePath = getImageUri(saveFileName).getPath();
 
                 Log.e("mImageCaptureUri : ", "Croped " + mImageCaptureUri.toString());
@@ -173,7 +184,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                     photo = BitmapFactory.decodeFile(imagePath);
                     resultView.setImageBitmap(photo);
                 }
-                break;
+                break;*/
 
                 // 임시 파일 삭제
 /*                File f = new File(mImageCaptureUri.getPath());
@@ -197,7 +208,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     }
     public String getRealPathFromURI(Uri contentUri) {
         String[] proj = { MediaStore.Images.Media.DATA };
-        Cursor cursor = getActivity().getContentResolver().query(contentUri, proj, null, null, null);
+        Cursor cursor = getContext().getContentResolver().query(contentUri, proj, null, null, null);
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
         return cursor.getString(column_index);
