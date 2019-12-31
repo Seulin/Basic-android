@@ -3,6 +3,7 @@ package com.example.practice.ui.main;
 import androidx.core.content.FileProvider;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -22,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.practice.BuildConfig;
 import com.example.practice.R;
@@ -110,120 +112,63 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
          * http://www.damonkohler.com/2009/02/android-recipes.html
          * http://www.firstclown.us/tag/android/
          */
-
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         // 임시로 사용할 파일의 경로를 생성
-       // String url = "tmp_" + String.valueOf(System.currentTimeMillis()) + ".jpg";
-        //File file = new File(Environment.getExternalStorageDirectory(), url);
-        //mImageCaptureUri = FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID+".fileprovider", file);
+        String url = "tmp_" + String.valueOf(System.currentTimeMillis()) + ".jpg";
+        File file = new File(Environment.getExternalStorageDirectory(), url);
+        mImageCaptureUri = FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".fileprovider", file);
 
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, getImageUri(saveFileName));
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
         // 특정기기에서 사진을 저장못하는 문제가 있어 다음을 주석처리 합니다.
         //intent.putExtra("return-data", true);
         startActivityForResult(intent, PICK_FROM_CAMERA);
     }
 
-    private Uri getImageUri(String saveFile) {
-        // 임시로 사용할 파일의 경로를 생성
-        File mediaStorageDir = new File(Environment.getExternalStorageDirectory() + "/DCIM", saveFolderName);
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
-                Log.d("MyCameraApp", "failed to create directory");
-                return null;
-            }
-        }
-
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        if(saveFile != null){
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + saveFile);
-        } else {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "pic_"+ timeStamp + ".jpg");
-        }
-        mImageCaptureUri = FileProvider.getUriForFile(getContext(),BuildConfig.APPLICATION_ID+".fileprovider", mediaFile);
-        imagePath = mImageCaptureUri.getPath();
-        Log.e("mImageCaptureUri : ", mImageCaptureUri.toString());
-        Log.e("imagePath : ", imagePath);
-
-        return mImageCaptureUri;
-    }
-
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode != RESULT_OK) {
-            return;
+    public void onActivityResult(int requestCode, int resultCode, Intent result) {
+        if (requestCode == PICK_FROM_ALBUM && resultCode == Activity.RESULT_OK) {
+            // RESULT_OK 는 동작 성공을 의미하며 수치는 -1 인데, Fragment에는 없다.
+            // 따라서, Activity에서 사용되는 RESULT_OK값을 가져와서 사용한다.
+            Log.d("onActivityResult", "pick from album");
+            beginCrop(result.getData());
         }
-        switch(requestCode) {
-            case Crop.REQUEST_CROP: {
-                // 크롭이 된 이후의 이미지를 넘겨 받습니다.
-                // 이미지뷰에 이미지를 보여준다거나 부가적인 작업 이후에
-                // 임시 파일을 삭제합니다.
-                final Bundle extras = data.getExtras();
-                String filePath = getImageUri(saveFileName).getPath();
-
-                Log.e("mImageCaptureUri : ", "Croped " + mImageCaptureUri.toString());
-
-                imagePath = filePath;
-
-                if (extras != null) {
-                    Bitmap photo = extras.getParcelable("data");
-                    Log.e("bitmapfac", imagePath);
-                    saveCropImage(photo,imagePath);
-                    Log.d("extras", photo+"");
-                    photo = BitmapFactory.decodeFile(imagePath);
-                    resultView.setImageBitmap(photo);
-                }
-                break;
-
-                // 임시 파일 삭제
-/*                File f = new File(mImageCaptureUri.getPath());
-                if(f.exists()) {
-                    f.delete();
-                }
-                break;*/
-            }
-            case PICK_FROM_ALBUM: {
-                mImageCaptureUri = data.getData();
-                //Log.e("앨범이미지 CROP",mImageCaptureUri.getPath().toString());
-                imagePath = getRealPathFromURI(mImageCaptureUri); // 실제 파일이 존재하는 경로
-                Log.e("앨범이미지 경로",imagePath);
-            }
-            case PICK_FROM_CAMERA: {
-                Log.d("onActivityResult", "request pick");
-                beginCrop(mImageCaptureUri);
-                break;
-            }
-        }
-    }
-    public String getRealPathFromURI(Uri contentUri) {
-        String[] proj = { MediaStore.Images.Media.DATA };
-        Cursor cursor = getActivity().getContentResolver().query(contentUri, proj, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
-    }
-    private void saveCropImage(Bitmap bitmap, String filePath) {
-        //read image file
-        File copyFile = new File(filePath);
-        BufferedOutputStream bos = null;
-        try {
-            copyFile.createNewFile();
-            int quality = 100;
-            bos = new BufferedOutputStream(new FileOutputStream(copyFile));
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, bos);
-            // 이미지가 클 경우 OutOfMemoryException 발생이 예상되어 압축
-            bos.flush();
-            bos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (requestCode == PICK_FROM_CAMERA && resultCode == Activity.RESULT_OK) {
+            // RESULT_OK 는 동작 성공을 의미하며 수치는 -1 인데, Fragment에는 없다.
+            Uri mPicImageURI = null;
+            if(mImageCaptureUri != null)
+                mPicImageURI = mImageCaptureUri;
+            else
+                mPicImageURI = result.getData();
+            Log.d("onActivityResult", "pick from camera");
+            beginCrop(mPicImageURI);
+        } else if (requestCode == Crop.REQUEST_CROP) { //CROP된 이미지
+            Log.d("onActivityResult", "request crop");
+            handleCrop(resultCode, result);
         }
     }
 
     private void beginCrop(Uri source) {
         Log.d("beginCrop", "start");
         Uri destination = Uri.fromFile(new File(getActivity().getCacheDir(), "cropped"));
-        Crop.of(source, destination).asSquare().start(getContext(),this);
+        Crop.of(source, destination).asSquare().start(getContext(), this);
         //start(Activity activity) 부분을 start(Context context, Fragment fragment)로 변경
     }
 
+    private void handleCrop(int resultCode, Intent result) {
+        if (resultCode == Activity.RESULT_OK) {
+            // Activity 의 RESULT_OK값을 사용
+            Log.d("handleCrop", "RESULT_OK");
+            resultView.setImageURI(Crop.getOutput(result));
+/*           // 따라서, Activity에서 사용되는 RESULT_OK값을 가져와서 사용한다.
+            Bundle extras = result.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            resultView.setImageBitmap(imageBitmap);*/
+        } else if (resultCode == Crop.RESULT_ERROR) {
+            Log.d("handleCrop", "RESULT_ERROR");
+            Toast.makeText(getActivity(), Crop.getError(result).getMessage(), Toast.LENGTH_SHORT).show();
+            //Activity에서 사용되던 this는 Fragment에서 보통 getActivity() 또는 getContext() 로 변경해서 사용한다.
+        }
+    }
 }
+
