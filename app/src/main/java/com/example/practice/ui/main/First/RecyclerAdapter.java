@@ -90,7 +90,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                         AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
                         View v = LayoutInflater.from(context)
-                                .inflate(R.layout.edittext, null, false);
+                                .inflate(R.layout.frist_edittext, null, false);
                         builder.setView(v);
                         final EditText editname = v.findViewById(R.id.editname); //view에는 callbutton 존재x
                         final EditText editgroup = v.findViewById(R.id.editgroup);

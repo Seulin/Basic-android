@@ -37,8 +37,6 @@ public class SecondFragment extends Fragment {
         MyGridAdapter gAdapter = new MyGridAdapter(view.getContext());
         gridView.setAdapter(gAdapter);
 
-
-
         return view;
     }
 
