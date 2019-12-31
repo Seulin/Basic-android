@@ -1,29 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".ui.main.ThirdFragment">
+    android:layout_margin="16dp"
+    android:padding="5dp">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fromcamera"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/twobuttons"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello"/>
+        android:orientation="horizontal">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fromgallery"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello" />
+        <Button
+            android:id="@+id/fromcamera"
+            android:layout_weight="1"
+            android:layout_width="190dp"
+            android:layout_height="50dp"
+            android:text="Camera" />
+
+        <Button
+            android:id="@+id/fromgallery"
+            android:layout_weight="1"
+            android:layout_width="190dp"
+            android:layout_height="50dp"
+            android:text="Gallery" />
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/result_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerInside"
-        android:background="@drawable/photo_frame" />
+        android:layout_above="@+id/threebuttons"
+        android:layout_below="@+id/twobuttons"
+        android:background="@drawable/photo_frame"
+        android:scaleType="centerInside" />
 
-</androidx.appcompat.widget.LinearLayoutCompat>
+    <LinearLayout
+        android:id="@+id/threebuttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/crop"
+            android:layout_weight="1"
+            android:layout_width="125dp"
+            android:layout_height="50dp"
+            android:text="Crop" />
+
+        <Button
+            android:id="@+id/draw"
+            android:layout_weight="1"
+            android:layout_width="125dp"
+            android:layout_height="50dp"
+            android:text="Draw" />
+
+        <Button
+            android:id="@+id/sendmessage"
+            android:layout_weight="1"
+            android:layout_width="125dp"
+            android:layout_height="50dp"
+            android:text="Send" />
+    </LinearLayout>
+
+
+</RelativeLayout>

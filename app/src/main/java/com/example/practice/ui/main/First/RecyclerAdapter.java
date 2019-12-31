@@ -57,7 +57,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent();
-                    intent.setAction(Intent.ACTION_DIAL);
+                    intent.setAction(Intent.ACTION_VIEW);
                     intent.setData(Uri.parse("tel:"+number));
                     context.startActivity(intent);
                 }
