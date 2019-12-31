@@ -1,21 +1,16 @@
 package com.example.practice.ui.main;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.example.practice.MainActivity;
 import com.example.practice.R;
 import com.example.practice.ui.main.First.FirstFragment;
+import com.example.practice.ui.main.Third.ThirdFragment;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
