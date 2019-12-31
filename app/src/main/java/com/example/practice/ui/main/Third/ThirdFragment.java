@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -103,11 +104,9 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.fromcamera:
                 doTakeCameraAction();
-                handleOrigin();
                 break;
             case R.id.fromgallery:
                 doTakeAlbumAction();
-                handleOrigin();
                 break;
             case R.id.crop:
                 beginCrop(resultUri); //contain handlecrop
@@ -172,26 +171,33 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
             // 따라서, Activity에서 사용되는 RESULT_OK값을 가져와서 사용한다.
             try {
                 Log.d("onActivityResult", "pick from album");
-                resultUri = result.getData();
-                imagePath = getRealPathFromURI(getContext(), resultUri);
+                resultUri = result.getData(); //work at album, but not at camera!
+                Log.d("albumResult", resultUri+"");
+                imagePath = getRealPathFromURI(getContext(), resultUri);//////////// same code below
                 InputStream in = getContext().getContentResolver().openInputStream(result.getData());
                 Bitmap bitmap = BitmapFactory.decodeStream(in);
                 in.close();
                 if (bitmap != null) {
-                    //checkRotate(imagePath);
-                    resultView.setImageBitmap(bitmap);
+                    Log.d("bitmap!, imagePath", imagePath+"");
+                    resultbitmap = checkRotate(imagePath, bitmap);
+                    resultView.setImageBitmap(resultbitmap);
                 }
-            } catch (Exception error) { error.printStackTrace(); }
+            } catch (Exception error) { error.printStackTrace(); }///////// please check before revise this!!
         }
         if (requestCode == PICK_FROM_CAMERA && resultCode == Activity.RESULT_OK) {
             try {
-                resultUri = result.getData();
+                Log.d("onActivityResult", "pick from camera");
+                //resultUri = (Crop.getOutput(result));
+                Log.d("cameraResult", resultUri+"");
+                //resultUri = result.getData(); It caused error. result.getData() == null
                 File file = new File(imagePath);
                 Bitmap bitmap2 = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), Uri.fromFile(file));
                 if (bitmap2 != null) {
-                    resultView.setImageBitmap(bitmap2);
+                    resultbitmap = checkRotate(imagePath, bitmap2);
+                    Log.d("bitmap2!, imagePath", imagePath+"");
+                    resultView.setImageBitmap(resultbitmap);
                 }
-            } catch (Exception error) { error.printStackTrace(); }
+            } catch (Exception error) { error.printStackTrace(); Log.d("errorcamera", resultUri+"");}
 /*            Uri mPicImageURI = null;
             if (mImageCaptureUri != null)
                 mPicImageURI = mImageCaptureUri;
@@ -200,7 +206,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
             Log.d("onActivityResult", "pick from camera");
             resultUri = mPicImageURI;*/
         } else if (requestCode == Crop.REQUEST_CROP) { //CROP된 이미지
-            Log.d("onActivityResult", "request crop");
+            Log.d("beforehandlecrop" , "requestcrop");
             handleCrop(resultCode, result);
         }
     }
@@ -213,16 +219,12 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         //start(Activity activity) 부분을 start(Context context, Fragment fragment)로 변경
     }
 
-    private void handleOrigin() {
-        resultView.setImageURI(resultUri);
-    }
-
     private void handleCrop(int resultCode, Intent result) {
         if (resultCode == Activity.RESULT_OK) {
+
             // Activity 의 RESULT_OK값을 사용
             resultUri = (Crop.getOutput(result));
-            Log.d("handleCrop", "RESULT_OK");
-            resultView.setImageDrawable(null);
+
             resultView.setImageURI(resultUri);
             //sendMMS(Crop.getOutput(result));
             if (cameraImage) {
@@ -237,6 +239,36 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 //Activity에서 사용되던 this는 Fragment에서 보통 getActivity() 또는 getContext() 로 변경해서 사용한다.
             }
         }
+    }
+
+    private Bitmap checkRotate(String path, Bitmap bitmap) {
+        try {
+        ExifInterface ei = new ExifInterface(path);
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_UNDEFINED);
+        Bitmap rotatedBitmap = null;
+        switch(orientation) {
+
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                rotatedBitmap = rotateImage(bitmap, 90);
+                break;
+
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                rotatedBitmap = rotateImage(bitmap, 180);
+                break;
+
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                rotatedBitmap = rotateImage(bitmap, 270);
+                break;
+
+            case ExifInterface.ORIENTATION_NORMAL:
+            default:
+                rotatedBitmap = bitmap;
+        }
+        return rotatedBitmap;
+        } catch (Exception error) { error.printStackTrace(); }
+        Bitmap nothing = null;
+        return nothing;
     }
 
     private String getRealPathFromURI(Context context, Uri contentUri) {
