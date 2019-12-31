@@ -39,7 +39,7 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(FirstViewModel.class);
+        mViewModel = ViewModelProviders.of(getActivity()).get(FirstViewModel.class);
 
 /*        final Observer<ArrayList<Dictionary>> listObserver = new Observer<ArrayList<Dictionary>>() {
             @Override

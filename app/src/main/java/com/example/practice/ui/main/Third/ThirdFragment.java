@@ -4,8 +4,11 @@ import androidx.core.content.FileProvider;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -23,6 +26,7 @@ import android.net.Uri;
 
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -36,6 +40,8 @@ import android.widget.Toast;
 import com.example.practice.BuildConfig;
 import com.example.practice.MainActivity;
 import com.example.practice.R;
+import com.example.practice.ui.main.First.Dictionary;
+import com.example.practice.ui.main.First.FirstViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
@@ -46,7 +52,10 @@ import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 
+import static android.content.DialogInterface.BUTTON_NEGATIVE;
+import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static com.android.mms.logs.LogTag.TAG;
 
 public class ThirdFragment extends Fragment implements View.OnClickListener {
@@ -65,11 +74,12 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     String saveFolderName = "cameraTemp";
     File mediaFile = null;
 
+    static String Number;
+
 
     //private LogAdapter logAdapter;
+    FirstViewModel mViewModel;
 
-
-    private ThirdViewModel mViewModel;
     protected Button fromcamera, fromgallery, crop, draw, sendmessage;
     private ImageView resultView;
 
@@ -77,6 +87,10 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         return new ThirdFragment();
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mViewModel = ViewModelProviders.of(getActivity()).get(FirstViewModel.class); }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -115,7 +129,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 //doTakeAlbumAction();
                 break;
             case R.id.sendmessage:
-                sendMMS("01066549455", resultUri);
+                pickContact(); //Number is assigned
                 break;
         }
     }
@@ -123,8 +137,6 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(ThirdViewModel.class);
-        // TODO: Use the ViewModel
     }
 
     public static Bitmap rotateImage(Bitmap source, float angle) { //회전하는 이미지를 원래대로 돌리는 함수
@@ -179,7 +191,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 in.close();
                 if (bitmap != null) {
                     Log.d("bitmap!, imagePath", imagePath+"");
-                    resultbitmap = checkRotate(imagePath, bitmap);
+                    Bitmap resultbitmap = checkRotate(imagePath, bitmap);
                     resultView.setImageBitmap(resultbitmap);
                 }
             } catch (Exception error) { error.printStackTrace(); }///////// please check before revise this!!
@@ -187,15 +199,16 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         if (requestCode == PICK_FROM_CAMERA && resultCode == Activity.RESULT_OK) {
             try {
                 Log.d("onActivityResult", "pick from camera");
-                //resultUri = (Crop.getOutput(result));
+                resultUri = Uri.fromFile(new File(imagePath));
                 Log.d("cameraResult", resultUri+"");
                 //resultUri = result.getData(); It caused error. result.getData() == null
                 File file = new File(imagePath);
+                Log.d("cameraResultsecond", Uri.fromFile(file)+"");
                 Bitmap bitmap2 = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), Uri.fromFile(file));
                 if (bitmap2 != null) {
-                    resultbitmap = checkRotate(imagePath, bitmap2);
+                    Bitmap resultbitmap2 = checkRotate(imagePath, bitmap2);
                     Log.d("bitmap2!, imagePath", imagePath+"");
-                    resultView.setImageBitmap(resultbitmap);
+                    resultView.setImageBitmap(resultbitmap2);
                 }
             } catch (Exception error) { error.printStackTrace(); Log.d("errorcamera", resultUri+"");}
 /*            Uri mPicImageURI = null;
@@ -211,8 +224,52 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private void beginCrop(Uri source) {
-        Log.d("beginCrop", "start");
+    private void pickContact() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Choose an address");
+// add a radio button list
+        //String[] contacts;
+        ArrayList<String> contactsArr = new ArrayList<>();
+        final String[] contacts = new String[mViewModel.getSize()];
+        for (Dictionary dict : mViewModel.getList()) {
+            contactsArr.add(dict.getName()+" ("+dict.getNumber()+") ");
+        }
+        contactsArr.toArray(contacts);
+
+        int checkedItem = 0; // cow
+        builder.setSingleChoiceItems(contacts, checkedItem, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Number = contacts[which];
+                // user checked an item
+            }
+        });
+// add OK and Cancel buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case BUTTON_NEGATIVE:
+                        Number = null;
+                        // int which = -2
+                        dialog.dismiss();
+                        break;
+                    case BUTTON_POSITIVE:
+                        // int which = -1
+                        Toast.makeText(getActivity(), Number, Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                        break;
+            }}
+        });
+        builder.setNegativeButton("Cancel", null);
+// create and show the alert dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void beginCrop(Uri source) { //if from camera source=file:///storage/emulated/0/tmp_1577811465781.jpg
+                                        //if from album source=content://media/external/imgaes/media/43
+        Log.d("beginCropscource:", source+"");
         File file = new File(getActivity().getCacheDir(), "cropped");
         Uri destination = FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".fileprovider", file);
         Crop.of(source, destination).asSquare().start(getContext(), this);
@@ -221,9 +278,36 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
 
     private void handleCrop(int resultCode, Intent result) {
         if (resultCode == Activity.RESULT_OK) {
-
             // Activity 의 RESULT_OK값을 사용
-            resultUri = (Crop.getOutput(result));
+            resultUri = (Crop.getOutput(result));//imagepath써
+/*            final Bundle extras = result.getExtras();
+            if(extras != null)
+            {Log.d("handlecrop, extras", extras+"");
+                Bitmap photo = extras.getParcelable("data");
+                resultView.setImageBitmap(photo);
+            }*/
+            출처: https://gogorchg.tistory.com/entry/Android-Camera-호출-후-이미지-Crop하기-예제 [항상 초심으로]
+/*            Log.d("handlecrop, resulturi", resultUri+"");
+            String imagePath = resultUri.getPath();
+            Log.d("handlecrop, imagepath", imagePath+"");
+            Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+            Bitmap resultbitmap = checkRotate(imagePath, bitmap);
+            Log.d("handlecrop, bitmap", resultbitmap+"");
+            resultView.setImageBitmap(resultbitmap);*/
+            //image rotation error doesn't fixed.ㅠㅜㅠ
+/*            Log.d("handle,resuUri,getOut", resultUri+"");
+            //resultUri = result.getData(); it is null
+            try {  //we have to get uri again! because the images was cropped
+            imagePath = getRealPathFromURI(getContext(), resultUri);
+            Log.d("handlecrop, imagepath", imagePath+"");
+            InputStream in = getContext().getContentResolver().openInputStream(resultUri);
+            Bitmap bitmap = BitmapFactory.decodeStream(in);
+            in.close();
+            if (bitmap != null) {
+                resultbitmap = checkRotate(imagePath, bitmap);
+                Log.d("handlecrop, bitmap", resultbitmap+"");
+                resultView.setImageBitmap(resultbitmap);
+            } } catch (Exception error) { error.printStackTrace(); Log.d("errorhandle", resultUri+"");}*/
 
             resultView.setImageURI(resultUri);
             //sendMMS(Crop.getOutput(result));
@@ -270,6 +354,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         Bitmap nothing = null;
         return nothing;
     }
+
 
     private String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
