@@ -169,9 +169,10 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                     Log.e("bitmapfac", imagePath);
                     saveCropImage(photo,imagePath);
                     Log.d("extras", photo+"");
-                    photo = BitmapFactory.decodeFile("content://media"+imagePath);
+                    photo = BitmapFactory.decodeFile(imagePath);
                     resultView.setImageBitmap(photo);
                 }
+                break;
 
                 // 임시 파일 삭제
 /*                File f = new File(mImageCaptureUri.getPath());
