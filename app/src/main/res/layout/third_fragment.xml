@@ -30,10 +30,9 @@
             android:background="@color/green"
             android:radius="5dp"
             android:shadowColor="#000000"
-
-            android:text="Gallery"
             android:textSize="20sp"
-            android:textColor="#FFFFFF" />
+            android:textColor="#FFFFFF"
+            android:text="Gallery"/>
 
         <Button
             android:id="@+id/sendmessage"
@@ -83,23 +82,38 @@
 
         <Button
             android:id="@+id/crop"
-            android:layout_weight="1"
             android:layout_width="40dp"
             android:layout_height="50dp"
-            android:text="Crop" />
+            android:layout_weight="1"
+            android:background="@color/orange"
+            android:radius="5dp"
+            android:shadowColor="#000000"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:text="Crop"/>
 
         <Button
             android:id="@+id/filter1"
             android:layout_weight="1"
             android:layout_width="20dp"
             android:layout_height="50dp"
-            android:text="F 1" />
+            android:background="@color/green"
+            android:radius="5dp"
+            android:shadowColor="#000000"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF"
+            android:text="F 1"/>
 
         <Button
             android:id="@+id/filter2"
             android:layout_weight="1"
             android:layout_width="20dp"
             android:layout_height="50dp"
+            android:background="@color/orange"
+            android:shadowColor="#000000"
+            android:radius="5dp"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF"
             android:text="F 2" />
 
         <Button
@@ -107,6 +121,11 @@
             android:layout_weight="1"
             android:layout_width="20dp"
             android:layout_height="50dp"
+            android:background="@color/green"
+            android:radius="5dp"
+            android:shadowColor="#000000"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF"
             android:text="F 3" />
 
         <Button
@@ -114,6 +133,11 @@
             android:layout_weight="1"
             android:layout_width="20dp"
             android:layout_height="50dp"
+            android:background="@color/orange"
+            android:shadowColor="#000000"
+            android:radius="5dp"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF"
             android:text="F 4" />
 
     </LinearLayout>
