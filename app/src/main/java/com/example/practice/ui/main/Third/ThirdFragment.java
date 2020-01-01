@@ -143,6 +143,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         Bitmap inputImage;
         Bitmap outputImage;
         Filter myFilter;
+        try{
         switch (v.getId()) {
             case R.id.fromcamera:
                 doTakeCameraAction();
@@ -197,6 +198,9 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 pickContact(); //name is assigned, include sendMessage(this must be there, not here)
                 Log.d("pickcont done", name+"");
                 break;
+        }
+        } catch (SecurityException e) {
+            Toast.makeText(getActivity(), "Permission is not allowed. Please change your setting.", Toast.LENGTH_SHORT).show();
         }
     }
 
