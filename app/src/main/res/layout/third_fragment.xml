@@ -45,21 +45,43 @@
         <Button
             android:id="@+id/crop"
             android:layout_weight="1"
-            android:layout_width="125dp"
+            android:layout_width="40dp"
             android:layout_height="50dp"
             android:text="Crop" />
 
         <Button
-            android:id="@+id/draw"
+            android:id="@+id/filter1"
             android:layout_weight="1"
-            android:layout_width="125dp"
+            android:layout_width="20dp"
             android:layout_height="50dp"
-            android:text="Draw" />
+            android:text="F 1" />
+
+        <Button
+            android:id="@+id/filter2"
+            android:layout_weight="1"
+            android:layout_width="20dp"
+            android:layout_height="50dp"
+            android:text="F 2" />
+
+        <Button
+            android:id="@+id/filter3"
+            android:layout_weight="1"
+            android:layout_width="20dp"
+            android:layout_height="50dp"
+            android:text="F 3" />
+
+        <Button
+            android:id="@+id/filter4"
+            android:layout_weight="1"
+            android:layout_width="20dp"
+            android:layout_height="50dp"
+            android:text="F 4" />
+
 
         <Button
             android:id="@+id/sendmessage"
             android:layout_weight="1"
-            android:layout_width="125dp"
+            android:layout_width="35dp"
             android:layout_height="50dp"
             android:text="Send" />
     </LinearLayout>
