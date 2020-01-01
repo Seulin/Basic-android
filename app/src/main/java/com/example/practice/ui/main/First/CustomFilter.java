@@ -1,5 +1,6 @@
 package com.example.practice.ui.main.First;
 
+import android.util.Log;
 import android.widget.Filter;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,14 @@ public class CustomFilter extends Filter{
                     //ADD PLAYER TO FILTERED PLAYERS
                     filteredPlayers.add(filterList.get(i));
                 }
+                String number = convert(filterList.get(i).getNumber());
+                Log.d("convert", number+"");
+                if(number.toUpperCase().contains(constraint))
+                {Log.d("ifnumbersame", number+"");
+                    //ADD PLAYER TO FILTERED PLAYERS
+                    filteredPlayers.add(filterList.get(i));
+                }
+
             }
 
             results.count=filteredPlayers.size();
@@ -49,6 +58,18 @@ public class CustomFilter extends Filter{
         }
 
         return results;
+    }
+
+    private String convert(String input) {  //010-0000-0000 -> 010000000
+        String output = null;
+        String substr = input.substring(0, 3);
+        output = substr;
+        substr = input.substring(4, 8);
+        output += substr;
+        substr = input.substring(9, 13);
+        output += substr;
+        Log.d("convert", output+"");
+        return output;
     }
 
     @Override

@@ -5,8 +5,10 @@ import android.content.Context;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -124,9 +126,27 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                         dialog.show();
                         break;
                     case 1002:
-                        mData.remove(getAdapterPosition());
-                        notifyItemRemoved(getAdapterPosition());
-                        notifyItemRangeChanged(getAdapterPosition(), mData.size());
+                        AlertDialog.Builder alert_confirm = new AlertDialog.Builder(context);
+                        alert_confirm.setMessage("Do you want to delete the contact?").setCancelable(false).setPositiveButton("OK",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        mData.remove(getAdapterPosition());
+                                        notifyItemRemoved(getAdapterPosition());
+                                        notifyItemRangeChanged(getAdapterPosition(), mData.size());
+                                        dialog.dismiss();
+                                        return;
+                                    }
+                                }).setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                        return;
+                                    }
+                                });
+                        AlertDialog alert = alert_confirm.create();
+                        alert.show();
                         break;
                 }
                 return true;
@@ -167,12 +187,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         if (mData != null)
             return mData.size();
         else return 0;
-    }
-
-    public void setFilter(List<Dictionary> items) {
-        mData.clear();
-        mData.addAll(items);
-        notifyDataSetChanged();
     }
 
     @Override
