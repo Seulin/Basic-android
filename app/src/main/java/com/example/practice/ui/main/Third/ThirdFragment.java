@@ -453,9 +453,11 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
 
             final EditText receiverText = v.findViewById(R.id.receiver);
             final EditText contentText = v.findViewById(R.id.content);
+            final ImageView image = v.findViewById(R.id.imageattached);
             final Button sendButton = v.findViewById(R.id.sendbutton);
             receiverText.setText(name);
             receiverText.setSelection(receiverText.length());
+            //image.setImageBitmap();
 
             final AlertDialog dialog = builder.create();
             sendButton.setOnClickListener(new View.OnClickListener() {
