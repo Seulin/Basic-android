@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="16dp"
-    android:padding="5dp">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/twobuttons"
@@ -15,25 +13,55 @@
             android:id="@+id/fromcamera"
             android:layout_weight="1"
             android:layout_width="190dp"
-            android:layout_height="50dp"
-            android:text="Camera" />
+            android:layout_height="60dp"
+            android:text="Camera"
+            android:textSize="20sp"
+            android:textColor="#FFFFFF"
+            android:background="@color/orange"
+            android:shadowColor="#000000"
+            android:radius="5dp"
+/>
 
         <Button
             android:id="@+id/fromgallery"
             android:layout_weight="1"
             android:layout_width="190dp"
-            android:layout_height="50dp"
-            android:text="Gallery" />
+            android:layout_height="60dp"
+            android:background="@color/green"
+            android:radius="5dp"
+            android:shadowColor="#000000"
+
+            android:text="Gallery"
+            android:textSize="20sp"
+            android:textColor="#FFFFFF" />
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/result_image"
+    <RelativeLayout
+        android:id = "@+id/imagentext"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/threebuttons"
-        android:layout_below="@+id/twobuttons"
-        android:background="@drawable/photo_frame"
-        android:scaleType="centerInside" />
+        android:layout_below="@+id/twobuttons">
+
+        <ImageView
+            android:id="@+id/result_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside" />
+
+        <TextView
+            android:id="@+id/noimagetext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/result_image"
+            android:layout_alignStart="@+id/result_image"
+            android:layout_alignEnd="@+id/result_image"
+            android:layout_alignTop="@+id/result_image"
+            android:gravity="center"
+            android:text="@string/noimgae"/>
+    </RelativeLayout>
+
+
 
     <LinearLayout
         android:id="@+id/threebuttons"

@@ -35,7 +35,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.practice.BuildConfig;
@@ -80,7 +82,8 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     String saveFolderName = "cameraTemp";
     File mediaFile = null;
 
-    static String Number;
+    private String name = null;
+    ArrayList<String> sendList = new ArrayList<>();
 
 
     //private LogAdapter logAdapter;
@@ -88,6 +91,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
 
     protected Button fromcamera, fromgallery, crop, Filter1, Filter2, Filter3, Filter4, sendmessage;
     private ImageView resultView;
+    private TextView textView;
 
     public static ThirdFragment newInstance() {
         return new ThirdFragment();
@@ -96,36 +100,41 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewModel = ViewModelProviders.of(getActivity()).get(FirstViewModel.class); }
+        mViewModel = ViewModelProviders.of(getActivity()).get(FirstViewModel.class);
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.third_fragment, container, false);
-        View resultview = inflater.inflate(R.layout.third_resultview, container, false);
-
         System.loadLibrary("NativeImageProcessor");
 
+        //centerview
+        textView = view.findViewById(R.id.noimagetext);
         resultView = (ImageView) view.findViewById(R.id.result_image);
-        fromcamera = view.findViewById(R.id.fromcamera);
-        fromgallery = view.findViewById(R.id.fromgallery);
-        crop = view.findViewById(R.id.crop);
+
         Filter1 = view.findViewById(R.id.filter1);
         Filter2 = view.findViewById(R.id.filter2);
         Filter3 = view.findViewById(R.id.filter3);
         Filter4 = view.findViewById(R.id.filter4);
 
+        //button
+        fromcamera = view.findViewById(R.id.fromcamera);
+        fromgallery = view.findViewById(R.id.fromgallery);
+        crop = view.findViewById(R.id.crop);
         sendmessage = view.findViewById(R.id.sendmessage);
+
         fromcamera.setOnClickListener(this);
         fromgallery.setOnClickListener(this);
         crop.setOnClickListener(this);
+        sendmessage.setOnClickListener(this);
+
         Filter1.setOnClickListener(this);
         Filter2.setOnClickListener(this);
         Filter3.setOnClickListener(this);
         Filter4.setOnClickListener(this);
 
-        sendmessage.setOnClickListener(this);
         return view;
     }
 
@@ -135,7 +144,6 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         Bitmap inputImage;
         Bitmap outputImage;
         Filter myFilter;
-
         switch (v.getId()) {
             case R.id.fromcamera:
                 doTakeCameraAction();
@@ -164,8 +172,6 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 inputImage = drawable.getBitmap();
                 outputImage = myFilter.processFilter(inputImage);
                 resultView.setImageBitmap(outputImage);
-                break;
-
             case R.id.filter3:
                 myFilter = new Filter();
                 myFilter.addSubFilter(new ContrastSubFilter(1.2f));
@@ -185,9 +191,9 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 outputImage = myFilter.processFilter(inputImage);
                 resultView.setImageBitmap(outputImage);
                 break;
-
             case R.id.sendmessage:
-                pickContact(); //Number is assigned
+                pickContact(); //name is assigned, include sendMessage(this must be there, not here)
+                Log.d("pickcont done", name+"");
                 break;
         }
     }
@@ -242,88 +248,52 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
             try {
                 Log.d("onActivityResult", "pick from album");
                 resultUri = result.getData(); //work at album, but not at camera!
-                Log.d("albumResult", resultUri+"");
+                Log.d("albumResult", resultUri + "");
                 imagePath = getRealPathFromURI(getContext(), resultUri);
                 InputStream in = getContext().getContentResolver().openInputStream(result.getData());
                 Bitmap bitmap = BitmapFactory.decodeStream(in);
                 in.close();
                 if (bitmap != null) {
-                    Log.d("bitmap!, imagePath", imagePath+"");
+                    Log.d("bitmap!, imagePath", imagePath + "");
                     Bitmap resultbitmap = checkRotate(imagePath, bitmap);
                     resultView.setImageBitmap(resultbitmap);
+                    textView.setVisibility(View.GONE);
                 }
-            } catch (Exception error) { error.printStackTrace(); }
+            } catch (Exception error) {
+                error.printStackTrace();
+            }
         }
         if (requestCode == PICK_FROM_CAMERA && resultCode == Activity.RESULT_OK) {
             try {
                 Log.d("onActivityResult", "pick from camera");
                 resultUri = Uri.fromFile(new File(imagePath));
-                Log.d("cameraResult", resultUri+"");
+                Log.d("cameraResult", resultUri + "");
                 //resultUri = result.getData(); It caused error. result.getData() == null
                 File file = new File(imagePath);
-                Log.d("cameraResultsecond", Uri.fromFile(file)+"");
-                //////////// same code below
+                Log.d("cameraResultsecond", Uri.fromFile(file) + "");
+                //////////// same code below // bitmap convert to check the rotation
                 Bitmap bitmap2 = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), Uri.fromFile(file));
                 if (bitmap2 != null) {
                     Bitmap resultbitmap2 = checkRotate(imagePath, bitmap2);
-                    Log.d("bitmap2!, imagePath", imagePath+"");
+                    Log.d("bitmap2!, imagePath", imagePath + "");
                     resultView.setImageBitmap(resultbitmap2);
+                    textView.setVisibility(View.GONE);
                 }
-            } catch (Exception error) { error.printStackTrace(); Log.d("errorcamera", resultUri+"");}
+            } catch (Exception error) {
+                error.printStackTrace();
+                Log.d("errorcamera", resultUri + "");
+            }
             ///////// please check before revise this!!
 
         } else if (requestCode == Crop.REQUEST_CROP) { //CROP된 이미지
-            Log.d("beforehandlecrop" , "requestcrop");
+            Log.d("beforehandlecrop", "requestcrop");
             handleCrop(resultCode, result);
         }
     }
 
-    private void pickContact() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Choose an address");
-// add a radio button list
-        //String[] contacts;
-        ArrayList<String> contactsArr = new ArrayList<>();
-        final String[] contacts = new String[mViewModel.getSize()];
-        for (Dictionary dict : mViewModel.getList()) {
-            contactsArr.add(dict.getName()+" ("+dict.getNumber()+") ");
-        }
-        contactsArr.toArray(contacts);
-
-        int checkedItem = 0; // cow
-        builder.setSingleChoiceItems(contacts, checkedItem, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Number = contacts[which];
-                // user checked an item
-            }
-        });
-// add OK and Cancel buttons
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case BUTTON_NEGATIVE:
-                        Number = null;
-                        // int which = -2
-                        dialog.dismiss();
-                        break;
-                    case BUTTON_POSITIVE:
-                        // int which = -1
-                        Toast.makeText(getActivity(), Number, Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
-                        break;
-            }}
-        });
-        builder.setNegativeButton("Cancel", null);
-// create and show the alert dialog
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
     private void beginCrop(Uri source) { //if from camera source=file:///storage/emulated/0/tmp_1577811465781.jpg
-                                        //if from album source=content://media/external/imgaes/media/43
-        Log.d("beginCropscource:", source+"");
+        //if from album source=content://media/external/imgaes/media/43
+        Log.d("beginCropscource:", source + "");
         File file = new File(getActivity().getCacheDir(), "cropped");
         Uri destination = FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".fileprovider", file);
         Crop.of(source, destination).asSquare().start(getContext(), this);
@@ -333,15 +303,18 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     private void handleCrop(int resultCode, Intent result) {
         if (resultCode == Activity.RESULT_OK) {
             // Activity 의 RESULT_OK값을 사용
-            resultUri = (Crop.getOutput(result));//imagepath써
-            try {//////////// same code above
+            resultUri = (Crop.getOutput(result));
+            try {//////////// same code above // bitmap convert to check the rotation
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Crop.getOutput(result));
                 if (bitmap != null) {
                     Bitmap resultbitmap = checkRotate(imagePath, bitmap);
                     Log.d("bitmap!!handle,Path", imagePath + "");
                     resultView.setImageBitmap(resultbitmap);
                 }
-            } catch (Exception error) { error.printStackTrace(); Log.d("errorcamera", resultUri+"");}
+            } catch (Exception error) {
+                error.printStackTrace();
+                Log.d("errorcamera", resultUri + "");
+            }
             ///////// please check before revise this!!
 
             if (cameraImage) {
@@ -360,30 +333,32 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
 
     private Bitmap checkRotate(String path, Bitmap bitmap) {
         try {
-        ExifInterface ei = new ExifInterface(path);
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_UNDEFINED);
-        Bitmap rotatedBitmap = null;
-        switch(orientation) {
+            ExifInterface ei = new ExifInterface(path);
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_UNDEFINED);
+            Bitmap rotatedBitmap = null;
+            switch (orientation) {
 
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                rotatedBitmap = rotateImage(bitmap, 90);
-                break;
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    rotatedBitmap = rotateImage(bitmap, 90);
+                    break;
 
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                rotatedBitmap = rotateImage(bitmap, 180);
-                break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    rotatedBitmap = rotateImage(bitmap, 180);
+                    break;
 
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                rotatedBitmap = rotateImage(bitmap, 270);
-                break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotatedBitmap = rotateImage(bitmap, 270);
+                    break;
 
-            case ExifInterface.ORIENTATION_NORMAL:
-            default:
-                rotatedBitmap = bitmap;
+                case ExifInterface.ORIENTATION_NORMAL:
+                default:
+                    rotatedBitmap = bitmap;
+            }
+            return rotatedBitmap;
+        } catch (Exception error) {
+            error.printStackTrace();
         }
-        return rotatedBitmap;
-        } catch (Exception error) { error.printStackTrace(); }
         Bitmap nothing = null;
         return nothing;
     }
@@ -392,8 +367,8 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     private String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
         try {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            String[] proj = {MediaStore.Images.Media.DATA};
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
             return cursor.getString(column_index);
@@ -406,62 +381,82 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
             }
         }
     }
-
-    public void sendMMS(String phone, Uri imageUri) {
-
-        Settings sendSettings = new Settings();
-
-        sendSettings.setMmsc(" http://omms.nate.com:9082/oma_mms");
-        sendSettings.setProxy("smart.nate.com");
-        sendSettings.setPort("9093");
-        sendSettings.setGroup(true);
-        sendSettings.setDeliveryReports(false);
-        sendSettings.setSplit(false);
-        sendSettings.setSplitCounter(false);
-        sendSettings.setStripUnicode(false);
-        sendSettings.setSignature("");
-        sendSettings.setSendLongAsMms(true);
-        sendSettings.setSendLongAsMmsAfter(3);
-
-        Log.d(TAG, "sendMMS(Method) : " + "start");
-
-        String subject = "제목";
-        String text = "내용";
-
-        // 예시 (절대경로) : String imagePath = "/storage/emulated/0/Pictures/Screenshots/Screenshot_20190312-181007.png";
-        String imagePath = "이미지 경로";
-        imagePath = imageUri.getPath();
-
-        Log.d(TAG, "subject : " + subject);
-        Log.d(TAG, "text : " + text);
-        Log.d(TAG, "imagePath : " + imagePath);
-
-/*        Settings settings = new Settings();
-        settings.setUseSystemSending(true);*/
-
-
-        // TODO : 이 Transaction 클래스를 위에 링크에서 다운받아서 써야함
-        Transaction transaction = new Transaction(getContext(), sendSettings);
-
-        // 제목이 있을경우
-        Message message = new Message(text, phone, subject);
-
-        // 제목이 없을경우
-        // Message message = new Message(text, number);
-
-        if (!(imagePath.equals("") || imagePath == null)) {
-            // 예시2 (앱 내부 리소스) :
-            // Bitmap mBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.mms_test_1);
-            Bitmap mBitmap = BitmapFactory.decodeFile(imagePath);
-            // TODO : image를 여러장 넣고 싶은경우, addImage를 계속호출해서 넣으면됨
-            message.addImage(mBitmap);
+    private void pickContact() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Chose an address");
+// add a radio button list
+        //String[] contacts;
+        ArrayList<String> contactsArr = new ArrayList<>();
+        ArrayList<String> namesArr = new ArrayList<>();
+        final String[] contacts = new String[mViewModel.getSize()];
+        final String[] names = new String[mViewModel.getSize()];
+        for (Dictionary dict : mViewModel.getList()) {
+            contactsArr.add(dict.getName() + " (" + dict.getNumber() + ") ");
+            namesArr.add(dict.getName());
         }
+        contactsArr.toArray(contacts);
+        namesArr.toArray(names);
 
-        long id = android.os.Process.getThreadPriority(android.os.Process.myTid());
-
-        transaction.sendNewMessage(message, id);
-        Toast.makeText(getActivity(), "successfully send", Toast.LENGTH_SHORT).show();
+        int checkedItem = 0; // cow
+        name = names[0];
+        builder.setSingleChoiceItems(contacts, checkedItem, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                name = names[which];
+                // user checked an item
+            }
+        });
+// add OK and Cancel buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case BUTTON_NEGATIVE:
+                        name = null;
+                        // int which = -2
+                        dialog.dismiss();
+                        break;
+                    case BUTTON_POSITIVE:
+                        // int which = -1
+                        Log.d("buttonpositive", name+"");
+                        dialogSendMessage();
+                        dialog.dismiss();
+                        break;
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+// create and show the alert dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
+    private void dialogSendMessage() {
+        if (name == null) { Log.d("sendmms,nanull", name+""); return;}
+        else {
+            Log.d("sendmms,name;", name);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            View v = LayoutInflater.from(getActivity()).inflate(R.layout.third_sendmms, null, false);
+            builder.setView(v);
+
+            final EditText recieverText = v.findViewById(R.id.reciever);
+            final EditText contentText = v.findViewById(R.id.content);
+            final Button sendButton = v.findViewById(R.id.sendbutton);
+            recieverText.setText(name);
+
+            final AlertDialog dialog = builder.create();
+            sendButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    String strReciever = recieverText.getText().toString();
+                    String strContent = contentText.getText().toString();
+                    sendList.add(strReciever+" : "+strContent); //sendList do nothing
+                    Toast.makeText(getActivity(), "Message sent successfully", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                }
+            });
+            dialog.show();
+
+        }
+    }
 }
 
