@@ -41,6 +41,13 @@ public class FirstViewModel extends ViewModel {
         return items;
     }
 
+    public int getSize() {
+        if (items == null) {
+            return 0;
+        }
+        return items.size();
+    }
+
     public void add(Dictionary dict) {
         items.add(dict);
     }

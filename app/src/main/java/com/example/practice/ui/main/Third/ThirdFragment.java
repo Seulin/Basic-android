@@ -4,13 +4,17 @@ import androidx.core.content.FileProvider;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -22,6 +26,7 @@ import android.net.Uri;
 
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -35,6 +40,8 @@ import android.widget.Toast;
 import com.example.practice.BuildConfig;
 import com.example.practice.MainActivity;
 import com.example.practice.R;
+import com.example.practice.ui.main.First.Dictionary;
+import com.example.practice.ui.main.First.FirstViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
@@ -45,7 +52,10 @@ import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 
+import static android.content.DialogInterface.BUTTON_NEGATIVE;
+import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static com.android.mms.logs.LogTag.TAG;
 
 public class ThirdFragment extends Fragment implements View.OnClickListener {
@@ -64,11 +74,12 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     String saveFolderName = "cameraTemp";
     File mediaFile = null;
 
+    static String Number;
+
 
     //private LogAdapter logAdapter;
+    FirstViewModel mViewModel;
 
-
-    private ThirdViewModel mViewModel;
     protected Button fromcamera, fromgallery, crop, draw, sendmessage;
     private ImageView resultView;
 
@@ -76,6 +87,10 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         return new ThirdFragment();
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mViewModel = ViewModelProviders.of(getActivity()).get(FirstViewModel.class); }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -103,11 +118,9 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.fromcamera:
                 doTakeCameraAction();
-                handleOrigin();
                 break;
             case R.id.fromgallery:
                 doTakeAlbumAction();
-                handleOrigin();
                 break;
             case R.id.crop:
                 beginCrop(resultUri); //contain handlecrop
@@ -116,7 +129,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 //doTakeAlbumAction();
                 break;
             case R.id.sendmessage:
-                sendMMS("01066549455", resultUri);
+                pickContact(); //Number is assigned
                 break;
         }
     }
@@ -124,8 +137,6 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(ThirdViewModel.class);
-        // TODO: Use the ViewModel
     }
 
     public static Bitmap rotateImage(Bitmap source, float angle) { //회전하는 이미지를 원래대로 돌리는 함수
@@ -172,59 +183,109 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
             // 따라서, Activity에서 사용되는 RESULT_OK값을 가져와서 사용한다.
             try {
                 Log.d("onActivityResult", "pick from album");
-                resultUri = result.getData();
+                resultUri = result.getData(); //work at album, but not at camera!
+                Log.d("albumResult", resultUri+"");
                 imagePath = getRealPathFromURI(getContext(), resultUri);
                 InputStream in = getContext().getContentResolver().openInputStream(result.getData());
                 Bitmap bitmap = BitmapFactory.decodeStream(in);
                 in.close();
                 if (bitmap != null) {
-                    //checkRotate(imagePath);
-                    resultView.setImageBitmap(bitmap);
+                    Log.d("bitmap!, imagePath", imagePath+"");
+                    Bitmap resultbitmap = checkRotate(imagePath, bitmap);
+                    resultView.setImageBitmap(resultbitmap);
                 }
             } catch (Exception error) { error.printStackTrace(); }
         }
         if (requestCode == PICK_FROM_CAMERA && resultCode == Activity.RESULT_OK) {
             try {
-                resultUri = result.getData();
+                Log.d("onActivityResult", "pick from camera");
+                resultUri = Uri.fromFile(new File(imagePath));
+                Log.d("cameraResult", resultUri+"");
+                //resultUri = result.getData(); It caused error. result.getData() == null
                 File file = new File(imagePath);
+                Log.d("cameraResultsecond", Uri.fromFile(file)+"");
+                //////////// same code below
                 Bitmap bitmap2 = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), Uri.fromFile(file));
                 if (bitmap2 != null) {
-                    resultView.setImageBitmap(bitmap2);
+                    Bitmap resultbitmap2 = checkRotate(imagePath, bitmap2);
+                    Log.d("bitmap2!, imagePath", imagePath+"");
+                    resultView.setImageBitmap(resultbitmap2);
                 }
-            } catch (Exception error) { error.printStackTrace(); }
-/*            Uri mPicImageURI = null;
-            if (mImageCaptureUri != null)
-                mPicImageURI = mImageCaptureUri;
-            else
-                mPicImageURI = result.getData();
-            Log.d("onActivityResult", "pick from camera");
-            resultUri = mPicImageURI;*/
+            } catch (Exception error) { error.printStackTrace(); Log.d("errorcamera", resultUri+"");}
+            ///////// please check before revise this!!
+
         } else if (requestCode == Crop.REQUEST_CROP) { //CROP된 이미지
-            Log.d("onActivityResult", "request crop");
+            Log.d("beforehandlecrop" , "requestcrop");
             handleCrop(resultCode, result);
         }
     }
 
-    private void beginCrop(Uri source) {
-        Log.d("beginCrop", "start");
+    private void pickContact() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Choose an address");
+// add a radio button list
+        //String[] contacts;
+        ArrayList<String> contactsArr = new ArrayList<>();
+        final String[] contacts = new String[mViewModel.getSize()];
+        for (Dictionary dict : mViewModel.getList()) {
+            contactsArr.add(dict.getName()+" ("+dict.getNumber()+") ");
+        }
+        contactsArr.toArray(contacts);
+
+        int checkedItem = 0; // cow
+        builder.setSingleChoiceItems(contacts, checkedItem, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Number = contacts[which];
+                // user checked an item
+            }
+        });
+// add OK and Cancel buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case BUTTON_NEGATIVE:
+                        Number = null;
+                        // int which = -2
+                        dialog.dismiss();
+                        break;
+                    case BUTTON_POSITIVE:
+                        // int which = -1
+                        Toast.makeText(getActivity(), Number, Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                        break;
+            }}
+        });
+        builder.setNegativeButton("Cancel", null);
+// create and show the alert dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void beginCrop(Uri source) { //if from camera source=file:///storage/emulated/0/tmp_1577811465781.jpg
+                                        //if from album source=content://media/external/imgaes/media/43
+        Log.d("beginCropscource:", source+"");
         File file = new File(getActivity().getCacheDir(), "cropped");
         Uri destination = FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".fileprovider", file);
         Crop.of(source, destination).asSquare().start(getContext(), this);
         //start(Activity activity) 부분을 start(Context context, Fragment fragment)로 변경
     }
 
-    private void handleOrigin() {
-        resultView.setImageURI(resultUri);
-    }
-
     private void handleCrop(int resultCode, Intent result) {
         if (resultCode == Activity.RESULT_OK) {
             // Activity 의 RESULT_OK값을 사용
-            resultUri = (Crop.getOutput(result));
-            Log.d("handleCrop", "RESULT_OK");
-            resultView.setImageDrawable(null);
-            resultView.setImageURI(resultUri);
-            //sendMMS(Crop.getOutput(result));
+            resultUri = (Crop.getOutput(result));//imagepath써
+            try {//////////// same code above
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Crop.getOutput(result));
+                if (bitmap != null) {
+                    Bitmap resultbitmap = checkRotate(imagePath, bitmap);
+                    Log.d("bitmap!!handle,Path", imagePath + "");
+                    resultView.setImageBitmap(resultbitmap);
+                }
+            } catch (Exception error) { error.printStackTrace(); Log.d("errorcamera", resultUri+"");}
+            ///////// please check before revise this!!
+
             if (cameraImage) {
                 File f = new File(mImageCaptureUri.getPath());
                 Log.d("if cameraImage??", "OK");
@@ -238,6 +299,37 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
             }
         }
     }
+
+    private Bitmap checkRotate(String path, Bitmap bitmap) {
+        try {
+        ExifInterface ei = new ExifInterface(path);
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_UNDEFINED);
+        Bitmap rotatedBitmap = null;
+        switch(orientation) {
+
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                rotatedBitmap = rotateImage(bitmap, 90);
+                break;
+
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                rotatedBitmap = rotateImage(bitmap, 180);
+                break;
+
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                rotatedBitmap = rotateImage(bitmap, 270);
+                break;
+
+            case ExifInterface.ORIENTATION_NORMAL:
+            default:
+                rotatedBitmap = bitmap;
+        }
+        return rotatedBitmap;
+        } catch (Exception error) { error.printStackTrace(); }
+        Bitmap nothing = null;
+        return nothing;
+    }
+
 
     private String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
