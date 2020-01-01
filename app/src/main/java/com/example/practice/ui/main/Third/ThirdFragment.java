@@ -14,6 +14,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
@@ -50,6 +51,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.klinker.android.send_message.Message;
 import com.klinker.android.send_message.Settings;
 import com.soundcloud.android.crop.Crop;
+import com.zomato.photofilters.imageprocessors.Filter;
+import com.zomato.photofilters.imageprocessors.subfilters.BrightnessSubFilter;
+import com.zomato.photofilters.imageprocessors.subfilters.ColorOverlaySubFilter;
+import com.zomato.photofilters.imageprocessors.subfilters.ContrastSubFilter;
+import com.zomato.photofilters.imageprocessors.subfilters.VignetteSubFilter;
 
 
 import java.io.File;
@@ -83,7 +89,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     //private LogAdapter logAdapter;
     FirstViewModel mViewModel;
 
-    protected Button fromcamera, fromgallery, crop, draw, sendmessage;
+    protected Button fromcamera, fromgallery, crop, Filter1, Filter2, Filter3, Filter4, sendmessage;
     private ImageView resultView;
     private TextView textView;
 
@@ -102,28 +108,42 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.third_fragment, container, false);
+        System.loadLibrary("NativeImageProcessor");
 
         //centerview
         textView = view.findViewById(R.id.noimagetext);
         resultView = (ImageView) view.findViewById(R.id.result_image);
 
+        Filter1 = view.findViewById(R.id.filter1);
+        Filter2 = view.findViewById(R.id.filter2);
+        Filter3 = view.findViewById(R.id.filter3);
+        Filter4 = view.findViewById(R.id.filter4);
+
         //button
         fromcamera = view.findViewById(R.id.fromcamera);
         fromgallery = view.findViewById(R.id.fromgallery);
         crop = view.findViewById(R.id.crop);
-        draw = view.findViewById(R.id.draw);
         sendmessage = view.findViewById(R.id.sendmessage);
+
         fromcamera.setOnClickListener(this);
         fromgallery.setOnClickListener(this);
         crop.setOnClickListener(this);
-        draw.setOnClickListener(this);
         sendmessage.setOnClickListener(this);
+
+        Filter1.setOnClickListener(this);
+        Filter2.setOnClickListener(this);
+        Filter3.setOnClickListener(this);
+        Filter4.setOnClickListener(this);
 
         return view;
     }
 
     @Override
     public void onClick(View v) {
+        BitmapDrawable drawable;
+        Bitmap inputImage;
+        Bitmap outputImage;
+        Filter myFilter;
         switch (v.getId()) {
             case R.id.fromcamera:
                 doTakeCameraAction();
@@ -134,8 +154,42 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
             case R.id.crop:
                 beginCrop(resultUri); //contain handlecrop
                 break;
-            case R.id.draw:
-                //doTakeAlbumAction();
+            case R.id.filter1:
+                myFilter = new Filter();
+                myFilter.addSubFilter(new VignetteSubFilter(v.getContext(), 100));
+                resultView.invalidate();
+                drawable = (BitmapDrawable) resultView.getDrawable();
+                inputImage = drawable.getBitmap();
+                outputImage = myFilter.processFilter(inputImage);
+                resultView.setImageBitmap(outputImage);
+                break;
+
+            case R.id.filter2:
+                myFilter = new Filter();
+                myFilter.addSubFilter(new ColorOverlaySubFilter(100, .2f, .2f, .0f));
+                resultView.invalidate();
+                drawable = (BitmapDrawable) resultView.getDrawable();
+                inputImage = drawable.getBitmap();
+                outputImage = myFilter.processFilter(inputImage);
+                resultView.setImageBitmap(outputImage);
+            case R.id.filter3:
+                myFilter = new Filter();
+                myFilter.addSubFilter(new ContrastSubFilter(1.2f));
+                resultView.invalidate();
+                drawable = (BitmapDrawable) resultView.getDrawable();
+                inputImage = drawable.getBitmap();
+                outputImage = myFilter.processFilter(inputImage);
+                resultView.setImageBitmap(outputImage);
+                break;
+
+            case R.id.filter4:
+                myFilter = new Filter();
+                myFilter.addSubFilter(new BrightnessSubFilter(30));
+                resultView.invalidate();
+                drawable = (BitmapDrawable) resultView.getDrawable();
+                inputImage = drawable.getBitmap();
+                outputImage = myFilter.processFilter(inputImage);
+                resultView.setImageBitmap(outputImage);
                 break;
             case R.id.sendmessage:
                 pickContact(); //name is assigned, include sendMessage(this must be there, not here)
