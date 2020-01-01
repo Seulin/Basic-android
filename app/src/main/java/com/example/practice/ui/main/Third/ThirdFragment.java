@@ -152,6 +152,12 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 doTakeAlbumAction();
                 break;
             case R.id.crop:
+//                drawable = (BitmapDrawable) resultView.getDrawable();
+//                inputImage = drawable.getBitmap();
+//                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+//                inputImage.compress(Bitmap.CompressFormat.JPEG,100,bytes);
+//                String path = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), inputImage, "Title", null);
+//                beginCrop(Uri.parse(path)); //contain handlecrop
                 beginCrop(resultUri); //contain handlecrop
                 break;
             case R.id.filter1:
@@ -161,7 +167,6 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 drawable = (BitmapDrawable) resultView.getDrawable();
                 inputImage = drawable.getBitmap();
                 outputImage = myFilter.processFilter(inputImage);
-                resultUri = getImageUri(getContext(), outputImage);
                 resultView.setImageBitmap(outputImage);
                 break;
 
@@ -172,7 +177,6 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 drawable = (BitmapDrawable) resultView.getDrawable();
                 inputImage = drawable.getBitmap();
                 outputImage = myFilter.processFilter(inputImage);
-                resultUri = getImageUri(getContext(), outputImage);
                 resultView.setImageBitmap(outputImage);
             case R.id.filter3:
                 myFilter = new Filter();
@@ -181,7 +185,6 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 drawable = (BitmapDrawable) resultView.getDrawable();
                 inputImage = drawable.getBitmap();
                 outputImage = myFilter.processFilter(inputImage);
-                resultUri = getImageUri(getContext(), outputImage);
                 resultView.setImageBitmap(outputImage);
                 break;
             case R.id.filter4:
@@ -191,7 +194,6 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 drawable = (BitmapDrawable) resultView.getDrawable();
                 inputImage = drawable.getBitmap();
                 outputImage = myFilter.processFilter(inputImage);
-                resultUri = getImageUri(getContext(), outputImage);
                 resultView.setImageBitmap(outputImage);
                 break;
             case R.id.sendmessage:
