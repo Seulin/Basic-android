@@ -61,6 +61,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
@@ -83,7 +84,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     File mediaFile = null;
 
     private String name = null;
-    ArrayList<String> sendList = new ArrayList<>();
+    List<String> sendList = new ArrayList<>();
 
 
     //private LogAdapter logAdapter;
@@ -405,8 +406,8 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         builder.setTitle("Chose an address");
 // add a radio button list
         //String[] contacts;
-        ArrayList<String> contactsArr = new ArrayList<>();
-        ArrayList<String> namesArr = new ArrayList<>();
+        List<String> contactsArr = new ArrayList<>();
+        List<String> namesArr = new ArrayList<>();
         final String[] contacts = new String[mViewModel.getSize()];
         final String[] names = new String[mViewModel.getSize()];
         for (Dictionary dict : mViewModel.getList()) {

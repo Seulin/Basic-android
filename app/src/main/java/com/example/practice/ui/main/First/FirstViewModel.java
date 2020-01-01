@@ -19,21 +19,22 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.LinkedHashSet;
 
 public class FirstViewModel extends ViewModel {
-    //private MutableLiveData<ArrayList<Dictionary>> contactList;
-    private ArrayList<Dictionary> items;
+    private MutableLiveData<List<Dictionary>> contactList;
+    private List<Dictionary> items;
 
-/*    public MutableLiveData<ArrayList<Dictionary>> getLiveList() {
+    public MutableLiveData<List<Dictionary>> getLiveList() {
         if (contactList == null) {
             items = new ArrayList<>();
             contactList = new MutableLiveData<>();
         }
         return contactList;
-    }*/
+    }
 
-    public ArrayList<Dictionary> getList() {
+    public List<Dictionary> getList() {
         if (items == null) {
             items = new ArrayList<>();
             //contactList = new MutableLiveData<>();
@@ -50,6 +51,12 @@ public class FirstViewModel extends ViewModel {
 
     public void add(Dictionary dict) {
         items.add(dict);
+        contactList.setValue(items);
+    }
+
+    public void delete(Dictionary dict) {
+        items.remove(dict);
+        contactList.setValue(items);
     }
 
     public void jsonProcess(AssetManager am) {
@@ -75,7 +82,7 @@ public class FirstViewModel extends ViewModel {
         return json;
     }
 
-    private void jsonParsing(String json, ArrayList<Dictionary> items) {
+    private void jsonParsing(String json, List<Dictionary> items) {
         try {
             JSONObject jsonObject = new JSONObject(json);
 
@@ -113,7 +120,7 @@ public class FirstViewModel extends ViewModel {
                 selectionArgs, sortOrder);
 
         LinkedHashSet<Dictionary> hashlist = new LinkedHashSet<>();
-        ArrayList<Dictionary> contactsList;
+        List<Dictionary> contactsList;
 
         if (cursor.moveToFirst()) {
             do {
@@ -133,7 +140,7 @@ public class FirstViewModel extends ViewModel {
         if (cursor != null) {
             cursor.close();
         }
-        ArrayList<Dictionary> copy = new ArrayList<>(items);
+        List<Dictionary> copy = new ArrayList<>(items);
         for (Dictionary dict : contactsList) {
             if (hasdict(dict, copy)) {
                 break;
@@ -143,7 +150,7 @@ public class FirstViewModel extends ViewModel {
         }
     }
 
-    private boolean hasdict(Dictionary dict, ArrayList<Dictionary> items) {
+    private boolean hasdict(Dictionary dict, List<Dictionary> items) {
         for (Dictionary item : items) {
             if (item.getNumber().equals(dict.getNumber())) {
                 return true;

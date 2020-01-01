@@ -1,6 +1,7 @@
 package com.example.practice.ui.main.First;
 
 import androidx.appcompat.widget.SearchView;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.app.AlertDialog;
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +27,10 @@ import com.example.practice.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-public class FirstFragment extends Fragment implements View.OnClickListener, SearchView.OnQueryTextListener {
+import java.util.ArrayList;
+import java.util.List;
+
+public class FirstFragment extends Fragment implements View.OnClickListener {
     RecyclerView rv;
     RecyclerAdapter ra;
     SearchView sv;
@@ -33,7 +38,9 @@ public class FirstFragment extends Fragment implements View.OnClickListener, Sea
     Animation fabopen, fabclose, fabrclock, fabranticlock;
     boolean isOpen = false;
 
+    public List<Dictionary> dictList = new ArrayList<>();
     private FirstViewModel mViewModel;
+
 
     public static FirstFragment newInstance() {
         return new FirstFragment(); //
@@ -44,26 +51,30 @@ public class FirstFragment extends Fragment implements View.OnClickListener, Sea
         super.onCreate(savedInstanceState);
         mViewModel = ViewModelProviders.of(getActivity()).get(FirstViewModel.class);
 
-/*        final Observer<ArrayList<Dictionary>> listObserver = new Observer<ArrayList<Dictionary>>() {
-            @Override
-            public void onChanged(ArrayList<Dictionary> dictionaries) {
-                //not used in this code,
-            }
-        };
-        mViewModel.getLiveList().observe(this, listObserver);*/
-        mViewModel.getList();
+       final Observer<List<Dictionary>> listObserver = new Observer<List<Dictionary>>() {
+           @Override
+           public void onChanged(List<Dictionary> dictionaries) {
+               dictList = dictionaries;
+               Log.d("aaobeserv", dictList+"");
+           }
+       };
+        mViewModel.getLiveList().observe(getActivity(), listObserver);
         mViewModel.jsonProcess(getResources().getAssets());
+        Log.d("create", dictList+"");
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        Log.d("jsonprosse", "done");
         View view = inflater.inflate(R.layout.first_fragment, container, false);
         rv = view.findViewById(R.id.recycler);
         sv = view.findViewById(R.id.search_view);
         rv.addItemDecoration(new DividerItemDecoration(view.getContext(), 1));
 
-        ra = new RecyclerAdapter(mViewModel.getList(), getActivity());
+        Log.d("aarecyclerad", dictList+"");
+        Log.d("aaviewmodel", mViewModel.getList()+"");
+        ra = new RecyclerAdapter(dictList, getActivity());
         rv.setAdapter(ra);
 
         fab = view.findViewById(R.id.fab);
@@ -78,8 +89,6 @@ public class FirstFragment extends Fragment implements View.OnClickListener, Sea
         fab.setOnClickListener(this);
         add.setOnClickListener(this);
         sync.setOnClickListener(this);
-
-        sv.setOnQueryTextListener(this);
 
         rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -100,6 +109,19 @@ public class FirstFragment extends Fragment implements View.OnClickListener, Sea
                     fab.show();
                     fab.setClickable(true);
                 }
+            }
+        });
+
+        sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String queryString) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String queryString) {
+                ra.getFilter().filter(queryString);
+                return false;
             }
         });
 
@@ -168,18 +190,4 @@ public class FirstFragment extends Fragment implements View.OnClickListener, Sea
             }
         }
     }
-
-
-    @Override
-    public boolean onQueryTextSubmit(String queryString) {
-        ra.getFilter().filter(queryString);
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String queryString) {
-        ra.getFilter().filter(queryString);
-        return false;
-    }
-
 }

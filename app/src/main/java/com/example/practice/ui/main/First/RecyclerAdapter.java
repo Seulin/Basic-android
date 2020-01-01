@@ -23,13 +23,15 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.List;
 
 import com.example.practice.R;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> implements Filterable {
-    private ArrayList<Dictionary> mData;
-    private ArrayList<Dictionary> filteredmData;
+    List<Dictionary> mData;
+    List<Dictionary> filteredmData;
     Context context;
+    CustomFilter filter;
 
     // 아이템 뷰를 저장하는 뷰홀더 클래스.
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
@@ -50,7 +52,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                 @Override
                 public void onClick(View v) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle("연락처").setMessage("("+group+") "+number);
+                    builder.setTitle("연락처").setMessage("(" + group + ") " + number);
                     AlertDialog alertDialog = builder.create();
                     alertDialog.show();
                 }
@@ -62,7 +64,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                 public void onClick(View v) {
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse("tel:"+number));
+                    intent.setData(Uri.parse("tel:" + number));
                     context.startActivity(intent);
                 }
             });
@@ -71,7 +73,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                 public void onClick(View v) {
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_SENDTO);
-                    intent.setData(Uri.parse("sms:"+number));
+                    intent.setData(Uri.parse("sms:" + number));
                     context.startActivity(intent);
                 }
             });
@@ -124,7 +126,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                     case 1002:
                         mData.remove(getAdapterPosition());
                         notifyItemRemoved(getAdapterPosition());
-                        notifyItemRangeChanged(getAdapterPosition(),mData.size());
+                        notifyItemRangeChanged(getAdapterPosition(), mData.size());
                         break;
                 }
                 return true;
@@ -133,7 +135,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     }
 
     // 생성자에서 데이터 리스트 객체를 전달받음.
-    public RecyclerAdapter(ArrayList<Dictionary> list, Context context) {
+    public RecyclerAdapter(List<Dictionary> list, Context context) {
         this.mData = list;
         this.filteredmData = list;
         this.context = context;
@@ -167,34 +169,17 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         else return 0;
     }
 
+    public void setFilter(List<Dictionary> items) {
+        mData.clear();
+        mData.addAll(items);
+        notifyDataSetChanged();
+    }
+
     @Override
     public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                String charSequenceString = constraint.toString();
-                if (charSequenceString.isEmpty()) {
-                    filteredmData = mData;
-                } else {
-                    ArrayList<Dictionary> filteredList = new ArrayList<>();
-                    for (Dictionary dict : mData) {
-                        if (dict.getName().toLowerCase().contains(charSequenceString.toLowerCase())) {
-                            filteredList.add(dict);
-                        }
-                        filteredmData = filteredList;
-                    }
-
-                }
-                FilterResults results = new FilterResults();
-                results.values = filteredmData;
-                return results;
-            }
-
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                filteredmData = (ArrayList<Dictionary>) results.values;
-                notifyDataSetChanged();
-            }
-        };
+        if (filter == null) {
+            filter = new CustomFilter(filteredmData, this);
+        }
+        return filter;
     }
 }
