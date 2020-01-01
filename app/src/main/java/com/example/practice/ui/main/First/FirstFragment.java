@@ -55,6 +55,9 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
            @Override
            public void onChanged(List<Dictionary> dictionaries) {
                dictList = dictionaries;
+               try {
+               sv.setQueryHint(ra.getItemCount()+" contacts in your device"); }
+               catch (NullPointerException e) { }
                Log.d("aaobeserv", dictList+"");
            }
        };
@@ -74,8 +77,9 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
 
         Log.d("aarecyclerad", dictList+"");
         Log.d("aaviewmodel", mViewModel.getList()+"");
-        ra = new RecyclerAdapter(dictList, getActivity());
+        ra = new RecyclerAdapter(dictList, getActivity(), mViewModel);
         rv.setAdapter(ra);
+        sv.setQueryHint(ra.getItemCount()+" contacts in your device");
 
         fab = view.findViewById(R.id.fab);
         add = view.findViewById(R.id.add);

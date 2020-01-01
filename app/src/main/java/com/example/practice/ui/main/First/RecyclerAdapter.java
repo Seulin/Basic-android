@@ -3,6 +3,7 @@ package com.example.practice.ui.main.First;
 import android.app.AlertDialog;
 import android.content.Context;
 
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
@@ -34,6 +35,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     List<Dictionary> filteredmData;
     Context context;
     CustomFilter filter;
+
+    private FirstViewModel mViewModel;
 
     // 아이템 뷰를 저장하는 뷰홀더 클래스.
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
@@ -131,9 +134,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        mData.remove(getAdapterPosition());
-                                        notifyItemRemoved(getAdapterPosition());
-                                        notifyItemRangeChanged(getAdapterPosition(), mData.size());
+                                        int num = getAdapterPosition();
+                                        mViewModel.delete(mData.get(num));
+                                        //mData.remove(num);
+                                        notifyItemRemoved(num);
+                                        notifyItemRangeChanged(num, mData.size());
                                         dialog.dismiss();
                                         return;
                                     }
@@ -155,10 +160,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     }
 
     // 생성자에서 데이터 리스트 객체를 전달받음.
-    public RecyclerAdapter(List<Dictionary> list, Context context) {
+    public RecyclerAdapter(List<Dictionary> list, Context context, FirstViewModel firstViewModel) {
         this.mData = list;
         this.filteredmData = list;
         this.context = context;
+        this.mViewModel=firstViewModel;
     }
 
     // onCreateViewHolder() - 아이템 뷰를 위한 뷰홀더 객체 생성하여 리턴.
@@ -184,8 +190,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     // getItemCount() - 전체 데이터 갯수 리턴.
     @Override
     public int getItemCount() {
-        if (mData != null)
-            return mData.size();
+        if (mData != null) {
+            Log.d("getitem",mData+"");
+            return mData.size();}
         else return 0;
     }
 
