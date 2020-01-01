@@ -18,6 +18,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.practice.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -156,7 +157,7 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
                     mViewModel.getContactList(getActivity());
                     ra.notifyDataSetChanged();
                 } catch (SecurityException e) {
-                    Snackbar.make(rv, "Accessing to contact is not allowed. Change your setting.", Snackbar.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Permission is not allowed. Please change your setting.", Toast.LENGTH_SHORT).show();
                 }
                 break;
             }

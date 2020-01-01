@@ -144,6 +144,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         Bitmap inputImage;
         Bitmap outputImage;
         Filter myFilter;
+        try{
         switch (v.getId()) {
             case R.id.fromcamera:
                 doTakeCameraAction();
@@ -185,6 +186,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 drawable = (BitmapDrawable) resultView.getDrawable();
                 inputImage = drawable.getBitmap();
                 outputImage = myFilter.processFilter(inputImage);
+                resultbitmap = outputImage;
                 resultView.setImageBitmap(outputImage);
                 break;
             case R.id.filter4:
@@ -194,12 +196,18 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 drawable = (BitmapDrawable) resultView.getDrawable();
                 inputImage = drawable.getBitmap();
                 outputImage = myFilter.processFilter(inputImage);
+                resultbitmap = outputImage;
                 resultView.setImageBitmap(outputImage);
                 break;
             case R.id.sendmessage:
                 pickContact(); //name is assigned, include sendMessage(this must be there, not here)
                 Log.d("pickcont done", name+"");
                 break;
+                }
+        } catch (SecurityException e) {
+            Toast.makeText(getActivity(), "Permission is not allowed. Please change your setting.", Toast.LENGTH_SHORT).show();
+        } catch (NullPointerException e) {
+            Toast.makeText(getActivity(), "Please select the photo first.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -452,9 +460,11 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
 
             final EditText receiverText = v.findViewById(R.id.receiver);
             final EditText contentText = v.findViewById(R.id.content);
+            final ImageView image = v.findViewById(R.id.imageattached);
             final Button sendButton = v.findViewById(R.id.sendbutton);
             receiverText.setText(name);
             receiverText.setSelection(receiverText.length());
+            image.setImageBitmap(resultbitmap);
 
             final AlertDialog dialog = builder.create();
             sendButton.setOnClickListener(new View.OnClickListener() {
