@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.example.practice.R;
 import com.example.practice.ui.main.First.FirstFragment;
+import com.example.practice.ui.main.Second.SecondFragment;
 import com.example.practice.ui.main.Third.ThirdFragment;
 
 /**

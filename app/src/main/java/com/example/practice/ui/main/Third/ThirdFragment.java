@@ -49,8 +49,6 @@ import com.example.practice.ui.main.First.FirstViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
-import com.klinker.android.send_message.Message;
-import com.klinker.android.send_message.Settings;
 import com.soundcloud.android.crop.Crop;
 import com.zomato.photofilters.imageprocessors.Filter;
 import com.zomato.photofilters.imageprocessors.subfilters.BrightnessSubFilter;
@@ -59,13 +57,14 @@ import com.zomato.photofilters.imageprocessors.subfilters.ContrastSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.VignetteSubFilter;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 
 import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
-import static com.android.mms.logs.LogTag.TAG;
+//import static com.android.mms.logs.LogTag.TAG; need for Log in getRealPathFromUri
 
 public class ThirdFragment extends Fragment implements View.OnClickListener {
     private static final int PICK_FROM_CAMERA = 0;
@@ -75,8 +74,8 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     boolean cameraImage; //camera로부터 받아온 이미지인지, 임시 생성한 file을 삭제하는 기준
 
     private static Uri mImageCaptureUri; // 카메라 - 임시 uri
-    private static Uri resultUri; //pick from camera or gallery //위와 동일?
-    private static Bitmap resultbitmap;
+    private static Uri resultUri; // always updated
+    private static Bitmap resultbitmap; //always updated??
     private String imagePath; // 카메라:file.getAbsolutePath()로, in doTakeCameraAction
     //갤러리:getRealPathFromURI(Uri)로, in onActivityResult(),
     String saveFileName = "myphoto.jpg";
@@ -91,7 +90,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
     FirstViewModel mViewModel;
 
     protected Button fromcamera, fromgallery, crop, Filter1, Filter2, Filter3, Filter4, sendmessage;
-    private ImageView resultView;
+    private ImageView resultView; //always updated
     private TextView textView;
 
     public static ThirdFragment newInstance() {
@@ -162,6 +161,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 drawable = (BitmapDrawable) resultView.getDrawable();
                 inputImage = drawable.getBitmap();
                 outputImage = myFilter.processFilter(inputImage);
+                resultUri = getImageUri(getContext(), outputImage);
                 resultView.setImageBitmap(outputImage);
                 break;
 
@@ -172,6 +172,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 drawable = (BitmapDrawable) resultView.getDrawable();
                 inputImage = drawable.getBitmap();
                 outputImage = myFilter.processFilter(inputImage);
+                resultUri = getImageUri(getContext(), outputImage);
                 resultView.setImageBitmap(outputImage);
             case R.id.filter3:
                 myFilter = new Filter();
@@ -180,9 +181,9 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 drawable = (BitmapDrawable) resultView.getDrawable();
                 inputImage = drawable.getBitmap();
                 outputImage = myFilter.processFilter(inputImage);
+                resultUri = getImageUri(getContext(), outputImage);
                 resultView.setImageBitmap(outputImage);
                 break;
-
             case R.id.filter4:
                 myFilter = new Filter();
                 myFilter.addSubFilter(new BrightnessSubFilter(30));
@@ -190,6 +191,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
                 drawable = (BitmapDrawable) resultView.getDrawable();
                 inputImage = drawable.getBitmap();
                 outputImage = myFilter.processFilter(inputImage);
+                resultUri = getImageUri(getContext(), outputImage);
                 resultView.setImageBitmap(outputImage);
                 break;
             case R.id.sendmessage:
@@ -364,6 +366,12 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
         return nothing;
     }
 
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
 
     private String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
@@ -374,7 +382,7 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
             cursor.moveToFirst();
             return cursor.getString(column_index);
         } catch (Exception e) {
-            Log.e(TAG, "getRealPathFromURI Exception : " + e.toString());
+            //Log.e(TAG, "getRealPathFromURI Exception : " + e.toString());
             return "";
         } finally {
             if (cursor != null) {
@@ -440,17 +448,18 @@ public class ThirdFragment extends Fragment implements View.OnClickListener {
             View v = LayoutInflater.from(getActivity()).inflate(R.layout.third_sendmms, null, false);
             builder.setView(v);
 
-            final EditText recieverText = v.findViewById(R.id.reciever);
+            final EditText receiverText = v.findViewById(R.id.receiver);
             final EditText contentText = v.findViewById(R.id.content);
             final Button sendButton = v.findViewById(R.id.sendbutton);
-            recieverText.setText(name);
+            receiverText.setText(name);
+            receiverText.setSelection(receiverText.length());
 
             final AlertDialog dialog = builder.create();
             sendButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    String strReciever = recieverText.getText().toString();
+                    String strreceiver = receiverText.getText().toString();
                     String strContent = contentText.getText().toString();
-                    sendList.add(strReciever+" : "+strContent); //sendList do nothing
+                    sendList.add(strreceiver+" : "+strContent); //sendList do nothing
                     Toast.makeText(getActivity(), "Message sent successfully", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 }

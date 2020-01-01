@@ -12,20 +12,20 @@
         <Button
             android:id="@+id/fromcamera"
             android:layout_weight="1"
-            android:layout_width="190dp"
+            android:layout_width="125dp"
             android:layout_height="60dp"
-            android:text="Camera"
-            android:textSize="20sp"
-            android:textColor="#FFFFFF"
             android:background="@color/orange"
             android:shadowColor="#000000"
             android:radius="5dp"
+            android:text="Camera"
+            android:textSize="20sp"
+            android:textColor="#FFFFFF"
 />
 
         <Button
             android:id="@+id/fromgallery"
             android:layout_weight="1"
-            android:layout_width="190dp"
+            android:layout_width="125dp"
             android:layout_height="60dp"
             android:background="@color/green"
             android:radius="5dp"
@@ -34,6 +34,18 @@
             android:text="Gallery"
             android:textSize="20sp"
             android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/sendmessage"
+            android:layout_weight="1"
+            android:layout_width="125dp"
+            android:layout_height="60dp"
+            android:background="@color/orange"
+            android:shadowColor="#000000"
+            android:radius="5dp"
+            android:text="Send"
+            android:textSize="20sp"
+            android:textColor="#FFFFFF"/>
     </LinearLayout>
 
     <RelativeLayout
@@ -58,10 +70,9 @@
             android:layout_alignEnd="@+id/result_image"
             android:layout_alignTop="@+id/result_image"
             android:gravity="center"
+            android:textSize="20sp"
             android:text="@string/noimgae"/>
     </RelativeLayout>
-
-
 
     <LinearLayout
         android:id="@+id/threebuttons"
@@ -105,13 +116,6 @@
             android:layout_height="50dp"
             android:text="F 4" />
 
-
-        <Button
-            android:id="@+id/sendmessage"
-            android:layout_weight="1"
-            android:layout_width="35dp"
-            android:layout_height="50dp"
-            android:text="Send" />
     </LinearLayout>
 
 

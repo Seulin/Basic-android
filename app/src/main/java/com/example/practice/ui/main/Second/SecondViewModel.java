@@ -1,4 +1,4 @@
-package com.example.practice.ui.main;
+package com.example.practice.ui.main.Second;
 
 import androidx.lifecycle.ViewModel;
 

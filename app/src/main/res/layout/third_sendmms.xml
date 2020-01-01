@@ -9,7 +9,7 @@
     android:paddingEnd="10dp">
 
         <EditText
-            android:id="@+id/reciever"
+            android:id="@+id/receiver"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="15sp"
@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:padding="15sp"
             android:layout_marginTop="8dp"
-            android:hint="Group"
+            android:hint="YOUR TEXT HERE"
             android:inputType="textMultiLine|textNoSuggestions"
             android:background="@drawable/sendmessborder"
             android:lines="8"
