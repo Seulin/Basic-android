@@ -15,15 +15,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.example.practice.R;
 
-public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
+public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> implements Filterable {
     private ArrayList<Dictionary> mData;
+    private ArrayList<Dictionary> filteredmData;
     Context context;
 
     // 아이템 뷰를 저장하는 뷰홀더 클래스.
@@ -130,9 +135,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     // 생성자에서 데이터 리스트 객체를 전달받음.
     public RecyclerAdapter(ArrayList<Dictionary> list, Context context) {
         this.mData = list;
+        this.filteredmData = list;
         this.context = context;
     }
-
 
     // onCreateViewHolder() - 아이템 뷰를 위한 뷰홀더 객체 생성하여 리턴.
     @Override
@@ -160,5 +165,36 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         if (mData != null)
             return mData.size();
         else return 0;
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                String charSequenceString = constraint.toString();
+                if (charSequenceString.isEmpty()) {
+                    filteredmData = mData;
+                } else {
+                    ArrayList<Dictionary> filteredList = new ArrayList<>();
+                    for (Dictionary dict : mData) {
+                        if (dict.getName().toLowerCase().contains(charSequenceString.toLowerCase())) {
+                            filteredList.add(dict);
+                        }
+                        filteredmData = filteredList;
+                    }
+
+                }
+                FilterResults results = new FilterResults();
+                results.values = filteredmData;
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                filteredmData = (ArrayList<Dictionary>) results.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 }

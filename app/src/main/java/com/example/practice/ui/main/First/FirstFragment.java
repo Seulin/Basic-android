@@ -1,5 +1,6 @@
 package com.example.practice.ui.main.First;
 
+import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.app.AlertDialog;
@@ -24,9 +25,10 @@ import com.example.practice.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-public class FirstFragment extends Fragment implements View.OnClickListener {
+public class FirstFragment extends Fragment implements View.OnClickListener, SearchView.OnQueryTextListener {
     RecyclerView rv;
     RecyclerAdapter ra;
+    SearchView sv;
     FloatingActionButton fab, add, sync;
     Animation fabopen, fabclose, fabrclock, fabranticlock;
     boolean isOpen = false;
@@ -58,6 +60,7 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.first_fragment, container, false);
         rv = view.findViewById(R.id.recycler);
+        sv = view.findViewById(R.id.search_view);
         rv.addItemDecoration(new DividerItemDecoration(view.getContext(), 1));
 
         ra = new RecyclerAdapter(mViewModel.getList(), getActivity());
@@ -75,6 +78,8 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
         fab.setOnClickListener(this);
         add.setOnClickListener(this);
         sync.setOnClickListener(this);
+
+        sv.setOnQueryTextListener(this);
 
         rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -162,6 +167,19 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
                 break;
             }
         }
+    }
+
+
+    @Override
+    public boolean onQueryTextSubmit(String queryString) {
+        ra.getFilter().filter(queryString);
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String queryString) {
+        ra.getFilter().filter(queryString);
+        return false;
     }
 
 }
