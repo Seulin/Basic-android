@@ -27,7 +27,8 @@
         android:layout_marginRight="15sp"
         android:visibility="invisible"
         android:tint="@android:color/white"
-        android:backgroundTint="#f5007a"
+        android:backgroundTint="@color/dark"
+        app:borderWidth="0dp"
         android:src="@mipmap/ic_sync_round" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -39,7 +40,8 @@
         android:layout_marginRight="15sp"
         android:visibility="invisible"
         android:tint="@android:color/white"
-        android:backgroundTint="#f5007a"
+        android:backgroundTint="@color/dark"
+        app:borderWidth="0dp"
         app:srcCompat="@android:drawable/ic_input_add" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -49,7 +51,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="15sp"
         android:tint="@android:color/white"
-        android:backgroundTint="#f5007a"
+        android:backgroundTint="@color/blue"
+        app:borderWidth="0dp"
         app:srcCompat="@android:drawable/ic_input_add" />
 
 </FrameLayout>

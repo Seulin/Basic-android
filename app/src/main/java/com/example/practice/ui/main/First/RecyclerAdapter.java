@@ -41,7 +41,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             callbutton = itemView.findViewById(R.id.callButton);
             messagebutton = itemView.findViewById(R.id.messageButton);
 
-
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -95,7 +94,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                         final EditText editname = v.findViewById(R.id.editname); //view에는 callbutton 존재x
                         final EditText editgroup = v.findViewById(R.id.editgroup);
                         final EditText editnumber = v.findViewById(R.id.editnumber);
-                        final Button buttonsubmit = v.findViewById(R.id.button);
+                        final Button buttonsubmit = v.findViewById(R.id.okbutton);
+                        editname.setText(name.getText());
+                        editgroup.setText(group);
+                        editnumber.setText(number);
 
                         final AlertDialog dialog = builder.create();
                         buttonsubmit.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +106,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                                 String strGroup = editgroup.getText().toString();
                                 String strNumber = editnumber.getText().toString();
                                 Dictionary dict = new Dictionary(strName, strGroup, strNumber);
-                                mData.set(getAdapterPosition(), dict); // RecyclerView의 마지막 줄에 삽입
+                                mData.set(getAdapterPosition(), dict);
                                 notifyItemChanged(getAdapterPosition());
                                 dialog.dismiss();
                             }

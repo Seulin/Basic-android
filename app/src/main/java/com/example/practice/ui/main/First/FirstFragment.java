@@ -125,7 +125,7 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
                     isOpen = false;
                 }
                 break;
-            case R.id.add: {
+            case R.id.add: { //same code in the function dialogSendMessage in ThirdFragment.java
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 View v = LayoutInflater.from(getActivity()).inflate(R.layout.frist_edittext, null, false);
                 builder.setView(v);
@@ -133,7 +133,7 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
                 final EditText editname = v.findViewById(R.id.editname); //view에는 callbutton 존재x
                 final EditText editgroup = v.findViewById(R.id.editgroup);
                 final EditText editnumber = v.findViewById(R.id.editnumber);
-                final Button buttonsubmit = v.findViewById(R.id.button);
+                final Button buttonsubmit = v.findViewById(R.id.okbutton);
 
                 final AlertDialog dialog = builder.create();
                 buttonsubmit.setOnClickListener(new View.OnClickListener() {
