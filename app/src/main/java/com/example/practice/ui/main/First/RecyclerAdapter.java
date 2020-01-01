@@ -98,6 +98,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                         editname.setText(name.getText());
                         editgroup.setText(group);
                         editnumber.setText(number);
+                        editname.setSelection(editname.length());//커서 위치 끝으로
+                        editgroup.setSelection(editgroup.length());
+                        editgroup.setSelection(editgroup.length());
 
                         final AlertDialog dialog = builder.create();
                         buttonsubmit.setOnClickListener(new View.OnClickListener() {

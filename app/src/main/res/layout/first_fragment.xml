@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:scrollbarFadeDuration="3"
     android:scrollbarSize="5sp"
-    tools:context=".ui.main.SecondFragment">
+    tools:context=".ui.main.Second.SecondFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
