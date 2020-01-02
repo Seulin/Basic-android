@@ -49,7 +49,7 @@
         android:tint="@android:color/white"
         android:backgroundTint="@color/dark"
         app:borderWidth="0dp"
-        android:src="@mipmap/ic_sync_round" />
+        android:src="@mipmap/ic_sync" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add"
